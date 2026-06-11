@@ -427,7 +427,7 @@
           </section>
 
           <section class="panel span-6">
-            <h2 class="section-title">專任／兼任教師職級結構（113-114）</h2>
+            <h2 class="section-title">專任／兼任教師職級結構</h2>
             <div id="teacherCompareChart" class="chart"></div>
           </section>
 
@@ -549,22 +549,22 @@
         }
       },
       staff: {
-        yearsShort: ['113', '114'],
-        fulltime: [864, 858],
-        parttime: [869, 849],
+        yearsShort: ['112','113','114'],
+        fulltime: [862, 864, 858],
+        parttime: [856, 869, 849],
         fulltimeRanks: {
-          '教授': [351, 357],
-          '副教授': [244, 225],
-          '助理教授': [236, 246],
-          '講師': [22, 20],
-          '其他職級': [11, 17]
+          '教授': [347, 351, 357],
+          '副教授': [254, 244, 225],
+          '助理教授': [219, 236, 246],
+          '講師': [29, 22, 20],
+          '其他職級': [13, 11, 10]
         },
         parttimeRanks: {
-          '教授': [51, 50],
-          '副教授': [89, 84],
-          '助理教授': [363, 370],
-          '講師': [366, 345],
-          '其他職級': [0, 0]
+          '教授': [44, 51, 50],
+          '副教授': [94, 89, 84],
+          '助理教授': [319, 363, 370],
+          '講師': [399, 366, 345],
+          '其他職級': [0, 0, 0]
         },
         staffYears: ['108', '109', '110', '111', '112', '113'],
         staffTotals: [1436, 1488, 1496, 1454, 1389, 1349],
@@ -761,15 +761,15 @@
       const grid = document.getElementById('staffKpis');
       grid.innerHTML = '';
       const d = state.dataset.staff;
-      const ftDiff = d.fulltime[1] - d.fulltime[0];
-      const ptDiff = d.parttime[1] - d.parttime[0];
+      const ftDiff = d.fulltime[2] - d.fulltime[1];
+      const ptDiff = d.parttime[2] - d.parttime[1];
       const stDiff = d.staffTotals[d.staffTotals.length - 1] - d.staffTotals[d.staffTotals.length - 2];
       const insideTotal = d.structure113.inside.reduce((s, v) => s + v, 0);
       const outsideTotal = d.structure113.outside.reduce((s, v) => s + v, 0);
 
       const cards = [
-        { label: '114 專任教師總數', value: fmt(d.fulltime[1]) + ' 人' },
-        { label: '114 兼任教師總數', value: fmt(d.parttime[1]) + ' 人' },
+        { label: '114 專任教師總數', value: fmt(d.fulltime[2]) + ' 人' },
+        { label: '114 兼任教師總數', value: fmt(d.parttime[2]) + ' 人' },
         { label: '專任年增減', value: (ftDiff >= 0 ? '+' : '') + fmt(ftDiff) + ' 人' },
         { label: '兼任年增減', value: (ptDiff >= 0 ? '+' : '') + fmt(ptDiff) + ' 人' },
         { label: '113 編制內合計', value: fmt(insideTotal) + ' 人' },
