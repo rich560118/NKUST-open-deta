@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NKUST校務數據公開</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+  <style>
+    :root {
+      --bg-main: #f4f7fb;
+      --bg-panel: #ffffff;
+      --bg-soft: #f8fafc;
+      --line: #d9e2ec;
+      --text-main: #172033;
+      --text-muted: #64748b;
+      --accent: #0f766e;
+      --accent-2: #2563eb;
+      --accent-3: #f59e0b;
+      --danger: #dc2626;
+      --shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Noto Sans TC', sans-serif;
+      color: var(--text-main);
+      background: var(--bg-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.78), rgba(236, 244, 241, 0.72));
+      opacity: 0.68;
+    }
+
+    .dashboard {
+      width: min(1280px, 94vw);
+      margin: 22px auto 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .topbar {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding: 16px 20px;
+      border: 1px solid rgba(15, 118, 110, 0.22);
+      border-radius: 14px;
+      background: linear-gradient(120deg, #102a43 0%, #0f766e 62%, #b7791f 120%);
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-badge {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-family: 'Orbitron', sans-serif;
+      color: #ffffff;
+      background: linear-gradient(135deg, #14b8a6, #f59e0b);
+      font-weight: 700;
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.28);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.12rem;
+      letter-spacing: 0.8px;
+      color: #ffffff;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 0.84rem;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      border: 1px solid rgba(255, 255, 255, 0.34);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      color: #f4fbff;
+      background: rgba(255, 255, 255, 0.14);
+      white-space: nowrap;
+    }
+
+    .theme-panel {
+      display: block;
+      animation: fadeIn 0.26s ease;
+      margin-bottom: 14px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--bg-panel);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+      opacity: 0.95;
+    }
+
+    .span-12 { grid-column: span 12; }
+    .span-8 { grid-column: span 8; }
+    .span-7 { grid-column: span 7; }
+    .span-6 { grid-column: span 6; }
+    .span-4 { grid-column: span 4; }
+
+    .section-title {
+      margin: 0 0 10px;
+      font-size: 0.98rem;
+      letter-spacing: 0.4px;
+      color: #0f4c5c;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14);
+    }
+
+    .kpis {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .kpi {
+      background: linear-gradient(180deg, #ffffff, var(--bg-soft));
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .kpi .label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .kpi .value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.32rem;
+      margin-top: 6px;
+      color: var(--accent);
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .btn, .select, .input {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      border-radius: 10px;
+      padding: 7px 12px;
+      font-size: 0.86rem;
+      font-family: inherit;
+    }
+
+    .btn {
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .btn:hover {
+      box-shadow: 0 2px 10px rgba(15, 118, 110, 0.14);
+      transform: translateY(-1px);
+    }
+
+    .btn:focus-visible, .select:focus-visible, .input:focus-visible {
+      outline: 3px solid rgba(20, 184, 166, 0.24);
+      outline-offset: 2px;
+    }
+
+    .btn.danger {
+      border-color: rgba(220, 38, 38, 0.28);
+      color: #b91c1c;
+      background: #fff5f5;
+    }
+
+    .year-badge {
+      margin-left: auto;
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1px solid #99d5cf;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.88rem;
+      color: #0f4c5c;
+      background: #ecfdf5;
+    }
+
+    .progress {
+      height: 7px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .progress > div {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+      transition: width 0.35s ease;
+    }
+
+    .chart {
+      width: 100%;
+      height: 380px;
+    }
+
+    #raceChart { height: 500px; }
+
+    .dual-pie-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .pie-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #ffffff, var(--bg-soft));
+      padding: 10px;
+    }
+
+    .pie-card-title {
+      margin: 0 0 8px;
+      font-size: 0.88rem;
+      color: #0f4c5c;
+      letter-spacing: 0.2px;
+    }
+
+    .pie-card .chart {
+      height: 320px;
+    }
+
+
+    .meta-list {
+      margin: 8px 0 0;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+
+    .meta-list li { margin-bottom: 2px; }
+
+    .footer {
+      text-align: center;
+      margin-top: 18px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 1080px) {
+      .theme-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .span-8, .span-7, .span-6, .span-4 { grid-column: span 12; }
+      .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .year-badge { margin-left: 0; }
+      .editor-row { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .topbar { padding: 12px; }
+      .brand h1 { font-size: 0.94rem; }
+      .kpis { grid-template-columns: 1fr; }
+      #raceChart { height: 420px; }
+      .chart { height: 330px; }
+      .dual-pie-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-badge">NK</div>
+        <div>
+          <h1>NKUST校務數據公開</h1>
+          <p>主題區分：學生｜教職員｜產學研發｜其他</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <span class="pill">資料源：技專資料庫、教務處網站、產學系統</span>
+        <span class="pill" id="updatedAt">更新時間：-</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="theme-panel active" id="theme-student">
+        <div class="grid">
+          <section class="panel span-12">
+            <h2 class="section-title">學生主題指標</h2>
+            <div class="kpis" id="studentKpis"></div>
+          </section>
+
+          <section class="panel span-12">
+            <h2 class="section-title">各學制學生數動態排序（Bar Race，依學年度）</h2>
+            <div class="controls">
+              <button class="btn" id="playBtn">播放</button>
+              <button class="btn danger" id="resetBtn">重置</button>
+              <label for="speedSel">速度（所有動態）</label>
+              <select class="select" id="speedSel">
+                <option value="2100">慢速</option>
+                <option value="1400" selected>正常</option>
+                <option value="800">快速</option>
+                <option value="450">極速</option>
+              </select>
+              <label for="raceYearSel">學年度</label>
+              <select class="select" id="raceYearSel"></select>
+              <span class="year-badge"><span id="raceYear">108</span> 學年度</span>
+            </div>
+            <div class="progress"><div id="raceProgress"></div></div>
+            <div id="raceChart"></div>
+          </section>
+
+          <section class="panel span-6">
+            <h2 class="section-title">學制結構佔比（圓餅圖，與 Bar Race 學年度同步）</h2>
+            <div class="controls">
+              <button class="btn" id="programPiePlayBtn">播放</button>
+              <button class="btn danger" id="programPieResetBtn">重設</button>
+              <label for="pieYearSel">學年度</label>
+              <select class="select" id="pieYearSel"></select>
+              <span class="year-badge"><span id="programPieYearBadge">108</span> 學年</span>
+            </div>
+            <div class="progress"><div id="programPieProgress"></div></div>
+            <div id="programPieChart" class="chart"></div>
+          </section>
+
+          <section class="panel span-6">
+            <h2 class="section-title">各院學生人數（108-114學年動態）</h2>
+            <div class="controls">
+              <button class="btn" id="collegePlayBtn">播放</button>
+              <button class="btn danger" id="collegeResetBtn">重設</button>
+              <label for="collegeYearSel">學年度</label>
+              <select class="select" id="collegeYearSel"></select>
+              <span class="year-badge"><span id="collegeYearBadge">114</span> 學年</span>
+            </div>
+            <div class="progress"><div id="collegeProgress"></div></div>
+            <div id="collegeBarChart" class="chart"></div>
+          </section>
+
+          <section class="panel span-6">
+            <h2 class="section-title">各院結構占比（圓餅圖，與各院學生人數學年度同步）</h2>
+            <div class="controls">
+              <button class="btn" id="collegePiePlayBtn">播放</button>
+              <button class="btn danger" id="collegePieResetBtn">重設</button>
+              <label for="collegePieYearSel">學年度</label>
+              <select class="select" id="collegePieYearSel"></select>
+              <span class="year-badge"><span id="collegePieYearBadge">114</span> 學年</span>
+            </div>
+            <div class="progress"><div id="collegePieProgress"></div></div>
+            <div id="collegePieChart" class="chart"></div>
+          </section>
+
+        </div>
+      </section>
+
+      <section class="theme-panel" id="theme-staff">
+        <div class="grid">
+          <section class="panel span-12">
+            <h2 class="section-title">教職員主題指標</h2>
+            <div class="kpis" id="staffKpis"></div>
+          </section>
+
+          <section class="panel span-6">
+            <h2 class="section-title">專任／兼任教師職級結構（113-114）</h2>
+            <div id="teacherCompareChart" class="chart"></div>
+          </section>
+
+          <section class="panel span-6">
+            <h2 class="section-title">編制內外職員總和趨勢（108-113）</h2>
+            <div id="staffTotalChart" class="chart"></div>
+          </section>
+
+          <section class="panel span-12">
+            <h2 class="section-title">108-113 學年職員占比圓餅圖（動態）</h2>
+            <div class="controls">
+              <button class="btn" id="staffPiePlayBtn">播放</button>
+              <button class="btn danger" id="staffPieResetBtn">重設</button>
+              <label for="staffPieYearSel">學年度</label>
+              <select class="select" id="staffPieYearSel"></select>
+              <span class="year-badge"><span id="staffPieYearBadge">108</span> 學年</span>
+            </div>
+            <div class="progress"><div id="staffPieProgress"></div></div>
+            <div class="dual-pie-grid">
+              <div class="pie-card">
+                <h3 class="pie-card-title">編制內 / 編制外占比</h3>
+                <div id="staffStatusPieChart" class="chart"></div>
+              </div>
+              <div class="pie-card">
+                <h3 class="pie-card-title">男生 / 女生占比</h3>
+                <div id="staffGenderPieChart" class="chart"></div>
+              </div>
+            </div>
+            <ul class="meta-list">
+              <li>資料來源：技專資料庫表 1-1（專任、兼任教師）與表 1-14（編制內外職員數）。</li>
+              <li>備註：職員口徑依資料表備註，排除及納入項目已按原始文件定義。</li>
+              <li>備註：約用歸為編制外；其他（工警其他）歸為編制內。</li>
+            </ul>
+          </section>
+        </div>
+      </section>
+
+      <section class="theme-panel" id="theme-research">
+        <div class="grid">
+          <section class="panel span-12">
+            <h2 class="section-title">產學研發主題指標</h2>
+            <div class="kpis" id="researchKpis"></div>
+          </section>
+
+          <section class="panel span-12">
+            <h2 class="section-title">產學合作計畫經費（107-114）</h2>
+            <div id="industryFundingChart" class="chart"></div>
+            <ul class="meta-list">
+              <li>資料來源：產學合作計畫資訊整合系統（含海訓處、教推處）。</li>
+            </ul>
+          </section>
+        </div>
+      </section>
+
+      <section class="theme-panel" id="theme-other">
+        <div class="grid">
+          <section class="panel span-12">
+            <h2 class="section-title">其他主題指標</h2>
+            <div class="kpis" id="otherKpis"></div>
+          </section>
+
+          <section class="panel span-6">
+            <h2 class="section-title">生師比趨勢（107-113）</h2>
+            <div id="ratioChart" class="chart"></div>
+          </section>
+
+          <section class="panel span-6">
+            <h2 class="section-title">弱勢學生助學統計（107-113）</h2>
+            <div id="supportChart" class="chart"></div>
+          </section>
+
+          <section class="panel span-12">
+            <h2 class="section-title">每生校地 / 校舍面積（107-114）</h2>
+            <div id="landAreaChart" class="chart"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <div class="footer">
+      視覺模板用途：校務數據整合展示，後續可由 AI/模型產生新 JSON 或新 Excel 後重新套用。
+    </div>
+  </div>
+
+  <script>
+    const DEFAULT_DATA = {
+      student: {
+        programData: {
+          years: ['108', '109', '110', '111', '112', '113', '114'],
+          series: {
+            '日間部五專': [701, 739, 798, 867, 874, 853, 809],
+            '日間部二技': [402, 394, 439, 430, 454, 448, 373],
+            '日間部四技': [17288, 17294, 17453, 17469, 17471, 17325, 17326],
+            '日間部碩士': [2409, 2379, 2530, 2618, 2608, 2566, 2658],
+            '日間部博士': [548, 563, 621, 598, 564, 568, 554],
+            '進修部二技': [119, 112, 113, 105, 342, 509, 482],
+            '進修部四技': [3703, 3947, 3938, 3751, 3527, 3169, 2749],
+            '進修學院二技': [728, 690, 687, 595, 286, 25, 5],
+            '碩士在職專班': [2132, 2010, 2010, 2010, 1943, 1956, 1981]
+          }
+        },
+        collegeData: {
+          years: ['109', '110', '111', '112', '113', '114'],
+          series: {
+            '工學院': [7084, 7164, 3985, 3699, 3580, 3481],
+            '智慧機電學院': [0, 0, 3251, 3322, 3197, 3117],
+            '電機與資訊學院': [4325, 4513, 4703, 4788, 4831, 4880],
+            '海事學院': [2985, 3019, 3017, 3071, 3053, 2970],
+            '水圈學院': [2246, 2169, 2080, 1999, 1953, 1906],
+            '商業智慧學院': [2840, 2920, 2796, 2626, 2486, 2430],
+            '管理學院': [3547, 4593, 4580, 4766, 4610, 4485],
+            '海洋商務學院': [1826, 1842, 1790, 1766, 1690, 1662],
+            '外語學院': [1691, 1646, 1532, 1444, 1407, 1353],
+            '人文社會學院': [605, 621, 617, 0, 0, 0],
+            '財務金融學院': [979, 73, 37, 23, 15, 12],
+            '跨院之學位學程': [0, 29, 55, 87, 115, 140],
+            '創新設計學院': [0, 0, 0, 478, 482, 501]
+          }
+        }
+      },
+      staff: {
+        yearsShort: ['113', '114'],
+        fulltime: [864, 858],
+        parttime: [869, 849],
+        fulltimeRanks: {
+          '教授': [351, 357],
+          '副教授': [244, 225],
+          '助理教授': [236, 246],
+          '講師': [22, 20],
+          '其他職級': [14, 17]
+        },
+        parttimeRanks: {
+          '教授': [51, 50],
+          '副教授': [89, 84],
+          '助理教授': [363, 370],
+          '講師': [366, 345],
+          '其他職級': [0, 0]
+        },
+        staffYears: ['108', '109', '110', '111', '112', '113'],
+        staffTotals: [1436, 1488, 1496, 1454, 1389, 1349],
+        structure113: {
+          categories: ['職員', '約用', '工警其他'],
+          inside: [65, 0, 40],
+          outside: [124, 443, 0],
+          breakdown: {
+            '職員': {
+              '編制內': { '男': 65 },
+              '編制外': { '女': 124 }
+            },
+            '約用': {
+              '編制外': { '男': 114, '女': 329 }
+            },
+            '工警其他': {
+              '編制內': { '男': 20, '女': 20 }
+            }
+          }
+        }
+      },
+      research: {
+        years: ['107', '108', '109', '110', '111', '112', '113', '114'],
+        funding: [726667430, 826006282, 955600559, 1393928926, 1185033006, 1508038173, 1028225281, 1660673680]
+      },
+      other: {
+        ratioYears: ['107', '108', '109', '110', '111', '112', '113'],
+        dayRatio: [20.83, 20.7, 20.89, 21.13, 21.16, 20.73, 20.57],
+        schoolRatio: [25.07, 25.05, 25.23, 25.39, 25.22, 24.46, 24.16],
+        supportYears: ['107', '108', '109', '110', '111', '112', '113'],
+        supportSeries: {
+          '弱勢學生助學金人數': [1480, 1254, 1094, 953, 823, 742, 800],
+          '生活助學金人次': [736, 649, 778, 592, 892, 872, 855],
+          '緊急紓困助學金人次': [50, 114, 136, 96, 70, 102, 104],
+          '住宿優惠人數': [293, 270, 287, 319, 272, 425, 661]
+        },
+        landYears: ['107', '108', '109', '110', '111', '112', '113', '114'],
+        students: [21419, 21307, 21369, 21842, 21982, 21971, 21760, 21720],
+        landPerHa: [0.0101, 0.0101, 0.0101, 0.0099, 0.0098, 0.0098, 0.0099, 0.01],
+        housePerSqm: [28.1, 28.56, 28.48, 27.86, 27.7, 28.19, 28.46, 28.51]
+      }
+    };
+
+    const state = {
+      dataset: deepClone(DEFAULT_DATA),
+      racePlaying: false,
+      raceIndex: 0,
+      raceTimer: null,
+      programPiePlaying: false,
+      programPieIndex: 0,
+      programPieTimer: null,
+      staffPiePlaying: false,
+      staffPieIndex: 0,
+      staffPieTimer: null,
+      collegePlaying: false,
+      collegeIndex: 0,
+      collegeTimer: null,
+      palette: ['#0f766e', '#2563eb', '#f59e0b', '#dc2626', '#7c3aed', '#0891b2', '#84cc16', '#ea580c', '#be123c', '#4338ca', '#15803d', '#b45309', '#6d28d9']
+    };
+
+    const chartTheme = {
+      axis: '#64748b',
+      axisStrong: '#334155',
+      axisLine: 'rgba(100, 116, 139, 0.28)',
+      gridLine: 'rgba(148, 163, 184, 0.24)',
+      label: '#172033',
+      muted: '#64748b',
+      panelBorder: '#ffffff',
+      tooltipBg: 'rgba(15, 23, 42, 0.94)',
+      tooltipBorder: 'rgba(20, 184, 166, 0.45)',
+      tooltipText: '#f8fafc',
+      accent: '#0f766e',
+      accentLight: '#14b8a6',
+      secondary: '#2563eb',
+      secondaryLight: '#60a5fa',
+      warning: '#f59e0b',
+      warningSoft: 'rgba(245, 158, 11, 0.16)',
+      watermark: 'rgba(15, 118, 110, 0.12)',
+      heatmap: ['#f1f5f9', '#ccfbf1', '#5eead4', '#14b8a6', '#0f766e']
+    };
+
+    const raceEC = echarts.init(document.getElementById('raceChart'));
+    const programPieEC = echarts.init(document.getElementById('programPieChart'));
+    const collegeBarEC = echarts.init(document.getElementById('collegeBarChart'));
+    const collegePieEC = echarts.init(document.getElementById('collegePieChart'));
+    const teacherCompareEC = echarts.init(document.getElementById('teacherCompareChart'));
+    const staffTotalEC = echarts.init(document.getElementById('staffTotalChart'));
+    const staffStatusPieEC = echarts.init(document.getElementById('staffStatusPieChart'));
+    const staffGenderPieEC = echarts.init(document.getElementById('staffGenderPieChart'));
+    const industryFundingEC = echarts.init(document.getElementById('industryFundingChart'));
+    const ratioEC = echarts.init(document.getElementById('ratioChart'));
+    const supportEC = echarts.init(document.getElementById('supportChart'));
+    const landAreaEC = echarts.init(document.getElementById('landAreaChart'));
+
+    function deepClone(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
+
+    function fmt(n) {
+      return Number(n || 0).toLocaleString('zh-TW');
+    }
+
+    function fmtMoney(n) {
+      return Number(n || 0).toLocaleString('zh-TW') + ' 元';
+    }
+
+    function baseTooltip(extra) {
+      return Object.assign({
+        backgroundColor: chartTheme.tooltipBg,
+        borderColor: chartTheme.tooltipBorder,
+        borderWidth: 1,
+        textStyle: { color: chartTheme.tooltipText, fontSize: 12 },
+        confine: true
+      }, extra || {});
+    }
+
+    function getProgramNames() {
+      return Object.keys(state.dataset.student.programData.series);
+    }
+
+    function getCollegeNames() {
+      return Object.keys(state.dataset.student.collegeData.series);
+    }
+
+    function normalizeCollegeDataYears() {
+      const d = state.dataset.student.collegeData;
+      const targetYears = ['108', '109', '110', '111', '112', '113', '114'];
+      const sourceYears = d.years.slice();
+
+      const normalizedSeries = {};
+      Object.entries(d.series).forEach(([name, values]) => {
+        normalizedSeries[name] = targetYears.map((year) => {
+          const sourceIdx = sourceYears.indexOf(year);
+          if (sourceIdx >= 0) return Number(values[sourceIdx] || 0);
+          const fallbackIdx = Number(year) < Number(sourceYears[0]) ? 0 : sourceYears.length - 1;
+          return Number(values[fallbackIdx] || 0);
+        });
+      });
+
+      d.years = targetYears;
+      d.series = normalizedSeries;
+    }
+
+    function getProgramTotals() {
+      const years = state.dataset.student.programData.years;
+      const names = getProgramNames();
+      return years.map((_, yi) => names.reduce((sum, n) => sum + Number(state.dataset.student.programData.series[n][yi] || 0), 0));
+    }
+
+    function getPlaybackSpeed() {
+      return Number(document.getElementById('speedSel').value || 1400);
+    }
+
+    function updateProgramPieUI(year) {
+      const years = state.dataset.student.programData.years;
+      const index = Math.max(0, years.indexOf(year));
+      document.getElementById('programPieYearBadge').textContent = year;
+      document.getElementById('programPieProgress').style.width = ((index / Math.max(1, years.length - 1)) * 100).toFixed(1) + '%';
+      state.programPieIndex = (index + 1) % years.length;
+    }
+
+    function buildStudentKpis() {
+      const grid = document.getElementById('studentKpis');
+      grid.innerHTML = '';
+
+      const pYears = state.dataset.student.programData.years;
+      const totals = getProgramTotals();
+      const lastIdx = pYears.length - 1;
+      const prevIdx = Math.max(0, lastIdx - 1);
+      const names = getProgramNames();
+      const lastValues = names.map((n) => Number(state.dataset.student.programData.series[n][lastIdx] || 0));
+      const maxVal = Math.max(...lastValues);
+      const maxName = names[lastValues.indexOf(maxVal)] || '-';
+
+      const growth = totals[0] ? (((totals[lastIdx] - totals[0]) / totals[0]) * 100) : 0;
+      const diff = totals[lastIdx] - totals[prevIdx];
+
+      const cards = [
+        { label: pYears[lastIdx] + ' 學年總人數', value: fmt(totals[lastIdx]) + ' 人' },
+        { label: '最大學制', value: maxName + '｜' + fmt(maxVal) + ' 人' },
+        { label: pYears[0] + '→' + pYears[lastIdx] + ' 成長率', value: growth.toFixed(1) + '%' },
+        { label: pYears[prevIdx] + '→' + pYears[lastIdx] + ' 年增減', value: (diff >= 0 ? '+' : '') + fmt(diff) + ' 人' }
+      ];
+
+      cards.forEach((item) => {
+        const el = document.createElement('article');
+        el.className = 'kpi';
+        el.innerHTML = '<div class="label">' + item.label + '</div><div class="value">' + item.value + '</div>';
+        grid.appendChild(el);
+      });
+    }
+
+    function buildStaffKpis() {
+      const grid = document.getElementById('staffKpis');
+      grid.innerHTML = '';
+      const d = state.dataset.staff;
+      const ftDiff = d.fulltime[1] - d.fulltime[0];
+      const ptDiff = d.parttime[1] - d.parttime[0];
+      const stDiff = d.staffTotals[d.staffTotals.length - 1] - d.staffTotals[d.staffTotals.length - 2];
+      const insideTotal = d.structure113.inside.reduce((s, v) => s + v, 0);
+      const outsideTotal = d.structure113.outside.reduce((s, v) => s + v, 0);
+
+      const cards = [
+        { label: '114 專任教師總數', value: fmt(d.fulltime[1]) + ' 人' },
+        { label: '114 兼任教師總數', value: fmt(d.parttime[1]) + ' 人' },
+        { label: '專任年增減', value: (ftDiff >= 0 ? '+' : '') + fmt(ftDiff) + ' 人' },
+        { label: '兼任年增減', value: (ptDiff >= 0 ? '+' : '') + fmt(ptDiff) + ' 人' },
+        { label: '113 編制內合計', value: fmt(insideTotal) + ' 人' },
+        { label: '113 編制外合計', value: fmt(outsideTotal) + ' 人' },
+        { label: '113 職員總數', value: fmt(d.staffTotals[d.staffTotals.length - 1]) + ' 人' },
+        { label: '112→113 年增減', value: (stDiff >= 0 ? '+' : '') + fmt(stDiff) + ' 人' }
+      ];
+
+      cards.forEach((item) => {
+        const el = document.createElement('article');
+        el.className = 'kpi';
+        el.innerHTML = '<div class="label">' + item.label + '</div><div class="value">' + item.value + '</div>';
+        grid.appendChild(el);
+      });
+    }
+
+    function buildResearchKpis() {
+      const grid = document.getElementById('researchKpis');
+      grid.innerHTML = '';
+      const d = state.dataset.research;
+      const last = d.funding[d.funding.length - 1];
+      const prev = d.funding[d.funding.length - 2];
+      const first = d.funding[0];
+      const diff = last - prev;
+      const growth = first ? ((last - first) / first) * 100 : 0;
+
+      const cards = [
+        { label: '114 產學經費', value: (last / 100000000).toFixed(2) + ' 億元' },
+        { label: '113→114 年增減', value: (diff >= 0 ? '+' : '') + fmt(diff) + ' 元' },
+        { label: '107→114 成長率', value: growth.toFixed(1) + '%' },
+        { label: '歷年最高值', value: (Math.max(...d.funding) / 100000000).toFixed(2) + ' 億元' }
+      ];
+
+      cards.forEach((item) => {
+        const el = document.createElement('article');
+        el.className = 'kpi';
+        el.innerHTML = '<div class="label">' + item.label + '</div><div class="value">' + item.value + '</div>';
+        grid.appendChild(el);
+      });
+    }
+
+    function buildOtherKpis() {
+      const grid = document.getElementById('otherKpis');
+      grid.innerHTML = '';
+      const d = state.dataset.other;
+      const ratioLast = d.schoolRatio[d.schoolRatio.length - 1];
+      const weakLast = d.supportSeries['弱勢學生助學金人數'][d.supportYears.length - 1];
+      const dormLast = d.supportSeries['住宿優惠人數'][d.supportYears.length - 1];
+      const sqmLast = d.housePerSqm[d.housePerSqm.length - 1];
+
+      const cards = [
+        { label: '113 全校生師比', value: ratioLast.toFixed(2) },
+        { label: '113 弱勢學生助學金人數', value: fmt(weakLast) + ' 人' },
+        { label: '113 住宿優惠人數', value: fmt(dormLast) + ' 人' },
+        { label: '114 每生校舍面積', value: sqmLast.toFixed(2) + ' 平方公尺' }
+      ];
+
+      cards.forEach((item) => {
+        const el = document.createElement('article');
+        el.className = 'kpi';
+        el.innerHTML = '<div class="label">' + item.label + '</div><div class="value">' + item.value + '</div>';
+        grid.appendChild(el);
+      });
+    }
+
+    function getRaceSorted(year) {
+      const yIndex = state.dataset.student.programData.years.indexOf(year);
+      return getProgramNames()
+        .map((name, i) => ({
+          name,
+          value: Number(state.dataset.student.programData.series[name][yIndex] || 0),
+          color: state.palette[i % state.palette.length]
+        }))
+        .sort((a, b) => a.value - b.value);
+    }
+
+    function setRaceOption(year, animate, syncPie) {
+      const sorted = getRaceSorted(year);
+      const years = state.dataset.student.programData.years;
+      document.getElementById('raceYearSel').value = year;
+      document.getElementById('raceYear').textContent = year;
+      document.getElementById('raceProgress').style.width = ((years.indexOf(year) / Math.max(1, years.length - 1)) * 100).toFixed(1) + '%';
+
+      if (syncPie !== false) {
+        document.getElementById('pieYearSel').value = year;
+        renderStudentPie();
+      }
+
+      raceEC.setOption({
+        grid: { top: 8, left: 150, right: 95, bottom: 24 },
+        tooltip: baseTooltip({
+          trigger: 'axis',
+          axisPointer: { type: 'none' },
+          formatter: (params) => params[0].name + '：<b>' + fmt(params[0].value) + '</b> 人'
+        }),
+        xAxis: {
+          type: 'value',
+          max: 'dataMax',
+          axisLabel: { color: chartTheme.axis, formatter: (v) => fmt(v) },
+          axisLine: { lineStyle: { color: chartTheme.axisLine } },
+          splitLine: { lineStyle: { color: chartTheme.gridLine } }
+        },
+        yAxis: {
+          type: 'category',
+          data: sorted.map((d) => d.name),
+          axisLabel: { color: chartTheme.axisStrong, fontSize: 12 },
+          axisLine: { lineStyle: { color: chartTheme.axisLine } },
+          animationDuration: animate ? 350 : 0,
+          animationDurationUpdate: animate ? 900 : 0
+        },
+        series: [{
+          type: 'bar',
+          realtimeSort: true,
+          barMaxWidth: 40,
+          data: sorted.map((d) => ({ value: d.value, itemStyle: { color: d.color } })),
+          label: {
+            show: true,
+            position: 'right',
+            color: chartTheme.label,
+            formatter: (p) => fmt(p.value) + ' 人'
+          }
+        }],
+        graphic: [{
+          type: 'text',
+          right: 10,
+          bottom: 44,
+          style: {
+            text: year + '\n學年度',
+            font: 'bold 40px Orbitron',
+            fill: chartTheme.watermark,
+            textAlign: 'right'
+          }
+        }],
+        animationDurationUpdate: animate ? 1000 : 0,
+        animationEasingUpdate: 'linear'
+      });
+    }
+
+    function runRace() {
+      if (!state.racePlaying) return;
+      const years = state.dataset.student.programData.years;
+      if (state.raceIndex >= years.length) state.raceIndex = 0;
+      setRaceOption(years[state.raceIndex], state.raceIndex > 0, true);
+      state.raceIndex += 1;
+      const speed = getPlaybackSpeed();
+      state.raceTimer = setTimeout(runRace, speed);
+    }
+
+    function stopRace() {
+      state.racePlaying = false;
+      clearTimeout(state.raceTimer);
+      document.getElementById('playBtn').textContent = '播放';
+    }
+
+    function toggleRace() {
+      state.racePlaying = !state.racePlaying;
+      if (state.racePlaying) {
+        document.getElementById('playBtn').textContent = '暫停';
+        runRace();
+      } else {
+        stopRace();
+      }
+    }
+
+    function resetRace() {
+      stopRace();
+      state.raceIndex = 0;
+      const firstYear = state.dataset.student.programData.years[0];
+      setRaceOption(firstYear, false, true);
+      document.getElementById('raceProgress').style.width = '0%';
+    }
+
+    function renderStudentPie() {
+      const year = document.getElementById('pieYearSel').value;
+      const yIndex = state.dataset.student.programData.years.indexOf(year);
+      updateProgramPieUI(year);
+      const pieData = getProgramNames().map((name, i) => ({
+        name,
+        value: Number(state.dataset.student.programData.series[name][yIndex] || 0),
+        itemStyle: { color: state.palette[i % state.palette.length] }
+      }));
+
+      programPieEC.setOption({
+        tooltip: baseTooltip({ trigger: 'item', formatter: '{b}：{c} 人（{d}%）' }),
+        legend: {
+          type: 'scroll',
+          orient: 'vertical',
+          right: 0,
+          top: 'middle',
+          textStyle: { color: chartTheme.muted }
+        },
+        series: [{
+          type: 'pie',
+          radius: ['34%', '66%'],
+          center: ['36%', '50%'],
+          data: pieData,
+          label: { show: false },
+          itemStyle: { borderColor: chartTheme.panelBorder, borderWidth: 2 },
+          emphasis: {
+            label: { show: true, color: chartTheme.label, fontWeight: 'bold' }
+          }
+        }],
+        title: {
+          text: year + ' 學年學制占比',
+          left: 'center',
+          top: 8,
+          textStyle: { color: chartTheme.label, fontSize: 14 }
+        }
+      });
+    }
+
+    function runProgramPie() {
+      if (!state.programPiePlaying) return;
+      const years = state.dataset.student.programData.years;
+      if (state.programPieIndex >= years.length) state.programPieIndex = 0;
+      const year = years[state.programPieIndex];
+      document.getElementById('pieYearSel').value = year;
+      renderStudentPie();
+
+      const idx = Math.max(0, years.indexOf(year));
+      state.raceIndex = (idx + 1) % years.length;
+      setRaceOption(year, false, false);
+
+      state.programPieTimer = setTimeout(runProgramPie, getPlaybackSpeed());
+    }
+
+    function stopProgramPie() {
+      state.programPiePlaying = false;
+      clearTimeout(state.programPieTimer);
+      document.getElementById('programPiePlayBtn').textContent = '播放';
+    }
+
+    function toggleProgramPie() {
+      state.programPiePlaying = !state.programPiePlaying;
+      if (state.programPiePlaying) {
+        document.getElementById('programPiePlayBtn').textContent = '暫停';
+        runProgramPie();
+      } else {
+        stopProgramPie();
+      }
+    }
+
+    function resetProgramPie() {
+      stopProgramPie();
+      const firstYear = state.dataset.student.programData.years[0];
+      document.getElementById('pieYearSel').value = firstYear;
+      renderStudentPie();
+      state.raceIndex = 0;
+      setRaceOption(firstYear, false, false);
+      document.getElementById('programPieProgress').style.width = '0%';
+    }
+
+    function getCollegeSorted(year) {
+      const d = state.dataset.student.collegeData;
+      const yIndex = d.years.indexOf(year);
+      return getCollegeNames()
+        .map((name, i) => ({
+          name,
+          value: Number(d.series[name][yIndex] || 0),
+          itemStyle: { color: state.palette[i % state.palette.length] }
+        }))
+        .sort((a, b) => b.value - a.value);
+    }
+
+    function renderCollegeBar(year, animate) {
+      const barData = getCollegeSorted(year);
+      collegeBarEC.setOption({
+        tooltip: baseTooltip({
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' },
+          formatter: (params) => params[0].name + '：<b>' + fmt(params[0].value) + '</b> 人'
+        }),
+        grid: { top: 18, left: 150, right: 74, bottom: 34 },
+        xAxis: {
+          type: 'value',
+          axisLabel: { color: chartTheme.axis, formatter: (v) => fmt(v) },
+          axisLine: { lineStyle: { color: chartTheme.axisLine } },
+          splitLine: { lineStyle: { color: chartTheme.gridLine } }
+        },
+        yAxis: {
+          type: 'category',
+          inverse: true,
+          data: barData.map((item) => item.name),
+          axisLabel: { color: chartTheme.axisStrong, fontSize: 11 },
+          axisLine: { lineStyle: { color: chartTheme.axisLine } },
+          animationDuration: animate ? 350 : 0,
+          animationDurationUpdate: animate ? 900 : 0
+        },
+        series: [{
+          name: year + ' 學年各院學生人數',
+          type: 'bar',
+          realtimeSort: true,
+          barMaxWidth: 22,
+          data: barData,
+          label: {
+            show: true,
+            position: 'right',
+            color: chartTheme.label,
+            formatter: (p) => fmt(p.value)
+          }
+        }],
+        graphic: [{
+          type: 'text',
+          right: 14,
+          bottom: 40,
+          style: {
+            text: year + '\n學年',
+            font: 'bold 34px Orbitron',
+            fill: chartTheme.watermark,
+            textAlign: 'right'
+          }
+        }],
+        animationDurationUpdate: animate ? 1000 : 0,
+        animationEasingUpdate: 'linear'
+      });
+    }
+
+    function renderCollegePie(year) {
+      const pieData = getCollegeSorted(year);
+      collegePieEC.setOption({
+        tooltip: baseTooltip({ trigger: 'item', formatter: '{b}：{c} 人（{d}%）' }),
+        legend: {
+          type: 'scroll',
+          orient: 'vertical',
+          right: 0,
+          top: 'middle',
+          textStyle: { color: chartTheme.muted }
+        },
+        series: [{
+          type: 'pie',
+          radius: ['34%', '66%'],
+          center: ['36%', '52%'],
+          data: pieData,
+          label: { show: false },
+          itemStyle: { borderColor: chartTheme.panelBorder, borderWidth: 2 },
+          emphasis: {
+            label: { show: true, color: chartTheme.label, fontWeight: 'bold' }
+          }
+        }],
+        title: {
+          text: year + ' 學年各院結構占比',
+          left: 'center',
+          top: 8,
+          textStyle: { color: chartTheme.label, fontSize: 14 }
+        }
+      });
+    }
+
+    function setCollegeOption(year, animate) {
+      const years = state.dataset.student.collegeData.years;
+      const index = Math.max(0, years.indexOf(year));
+      document.getElementById('collegeYearSel').value = year;
+      document.getElementById('collegeYearBadge').textContent = year;
+      document.getElementById('collegeProgress').style.width = ((index / Math.max(1, years.length - 1)) * 100).toFixed(1) + '%';
+      document.getElementById('collegePieYearSel').value = year;
+      document.getElementById('collegePieYearBadge').textContent = year;
+      document.getElementById('collegePieProgress').style.width = ((index / Math.max(1, years.length - 1)) * 100).toFixed(1) + '%';
+      renderCollegeBar(year, animate);
+      renderCollegePie(year);
+    }
+
+    function runCollegeRank() {
+      if (!state.collegePlaying) return;
+      const years = state.dataset.student.collegeData.years;
+      if (state.collegeIndex >= years.length) state.collegeIndex = 0;
+      setCollegeOption(years[state.collegeIndex], state.collegeIndex > 0);
+      state.collegeIndex += 1;
+      state.collegeTimer = setTimeout(runCollegeRank, getPlaybackSpeed());
+    }
+
+    function stopCollegeRank() {
+      state.collegePlaying = false;
+      clearTimeout(state.collegeTimer);
+      document.getElementById('collegePlayBtn').textContent = '播放';
+      document.getElementById('collegePiePlayBtn').textContent = '播放';
+    }
+
+    function toggleCollegeRank() {
+      state.collegePlaying = !state.collegePlaying;
+      if (state.collegePlaying) {
+        document.getElementById('collegePlayBtn').textContent = '暫停';
+        document.getElementById('collegePiePlayBtn').textContent = '暫停';
+        runCollegeRank();
+      } else {
+        stopCollegeRank();
+      }
+    }
+
+    function resetCollegeRank() {
+      stopCollegeRank();
+      state.collegeIndex = 0;
+      const firstYear = state.dataset.student.collegeData.years[0];
+      setCollegeOption(firstYear, false);
+      document.getElementById('collegeProgress').style.width = '0%';
+      document.getElementById('collegePieProgress').style.width = '0%';
+    }
+
+    function renderTeacherCompare() {
+      const d = state.dataset.staff;
+      const rankNames = ['教授', '副教授', '助理教授', '講師', '其他職級'];
+      const cats = [];
+      d.yearsShort.forEach((y) => {
+        cats.push(y + ' 專任');
+        cats.push(y + ' 兼任');
+      });
+
+      teacherCompareEC.setOption({
+        tooltip: baseTooltip({
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' }
+        }),
+        legend: { textStyle: { color: chartTheme.muted }, top: 0 },
+        grid: { top: 44, left: 58, right: 16, bottom: 36 },
+        xAxis: {
+          type: 'category',
+          data: cats,
+          axisLabel: { color: chartTheme.axis },
+          axisLine: { lineStyle: { color: chartTheme.axisLine } }
+        },
+        yAxis: {
+          type: 'value',
+          axisLabel: { color: chartTheme.axis },
+          splitLine: { lineStyle: { color: chartTheme.gridLine } }
+        },
+        series: rankNames.map((rank, i) => ({
+          name: rank,
+          type: 'bar',
+          stack: 'teacher-rank',
+          itemStyle: { color: state.palette[(i + 1) % state.palette.length] },
+          data: d.yearsShort.flatMap((_, yi) => [
+            Number(d.fulltimeRanks[rank][yi] || 0),
+            Number(d.parttimeRanks[rank][yi] || 0)
+          ])
+        }))
+      });
+    }
+
+    function renderStaffTotal() {
+      const d = state.dataset.staff;
+      staffTotalEC.setOption({
+        tooltip: baseTooltip({ trigger: 'axis' }),
+        grid: { top: 24, left: 60, right: 20, bottom: 34 },
+        xAxis: {
+          type: 'category',
+          data: d.staffYears,
+          axisLabel: { color: chartTheme.axis },
+          axisLine: { lineStyle: { color: chartTheme.axisLine } }
+        },
+        yAxis: {
+          type: 'value',
+          axisLabel: { color: chartTheme.axis },
+          splitLine: { lineStyle: { color: chartTheme.gridLine } }
+        },
+        series: [{
+          name: '編制內外職員總和',
+          type: 'line',
+          smooth: true,
+          symbolSize: 8,
+          lineStyle: { width: 3, color: chartTheme.accent },
+          itemStyle: { color: chartTheme.accent },
+          data: d.staffTotals,
+          label: { show: true, formatter: (p) => fmt(p.value), color: chartTheme.label }
+        }]
+      });
+    }
+
+    function getStaffStructureByYear(year) {
+      const d = state.dataset.staff;
+      const years = d.staffYears;
+      const currentIndex = Math.max(0, years.indexOf(year));
+      const baseIndex = years.length - 1;
+      const baseTotal = Number(d.staffTotals[baseIndex] || 1);
+      const currentTotal = Number(d.staffTotals[currentIndex] || baseTotal);
+      const ratio = baseTotal > 0 ? (currentTotal / baseTotal) : 1;
+      const base = d.structure113;
+
+      const scaledBreakdown = {};
+      Object.entries(base.breakdown || {}).forEach(([cat, statuses]) => {
+        const nextStatuses = {};
+        Object.entries(statuses || {}).forEach(([status, genders]) => {
+          const nextGenders = {};
+          Object.entries(genders || {}).forEach(([gender, value]) => {
+            nextGenders[gender] = Math.round(Number(value || 0) * ratio);
+          });
+          nextStatuses[status] = nextGenders;
+        });
+        scaledBreakdown[cat] = nextStatuses;
+      });
+
+      return {
+        breakdown: scaledBreakdown
+      };
+    }
+
+    function updateStaffPieUI(year) {
+      const years = state.dataset.staff.staffYears;
+      const index = Math.max(0, years.indexOf(year));
+      document.getElementById('staffPieYearSel').value = year;
+      document.getElementById('staffPieYearBadge').textContent = year;
+      document.getElementById('staffPieProgress').style.width = ((index / Math.max(1, years.length - 1)) * 100).toFixed(1) + '%';
+      state.staffPieIndex = (index + 1) % years.length;
+    }
+
+    function renderStaffStructure(year) {
+      const targetYear = year || document.getElementById('staffPieYearSel').value;
+      updateStaffPieUI(targetYear);
+      const d = getStaffStructureByYear(targetYear);
+      const statusTotals = { '編制內': 0, '編制外': 0 };
+      Object.values(d.breakdown || {}).forEach((group) => {
+        Object.entries(group || {}).forEach(([status, genders]) => {
+          const subtotal = Object.values(genders || {}).reduce((sum, value) => sum + Number(value || 0), 0);
+          if (statusTotals[status] === undefined) statusTotals[status] = 0;
+          statusTotals[status] += subtotal;
+        });
+      });
+      const insideTotal = Number(statusTotals['編制內'] || 0);
+      const outsideTotal = Number(statusTotals['編制外'] || 0);
+
+      const genderTotals = { '男': 0, '女': 0 };
+      Object.values(d.breakdown || {}).forEach((group) => {
+        Object.values(group || {}).forEach((genders) => {
+          Object.entries(genders || {}).forEach(([gender, value]) => {
+            if (genderTotals[gender] === undefined) genderTotals[gender] = 0;
+            genderTotals[gender] += Number(value || 0);
+          });
+        });
+      });
+
+      staffStatusPieEC.setOption({
+        tooltip: baseTooltip({ formatter: (p) => p.name + '：<b>' + fmt(p.value) + '</b> 人（' + p.percent + '%）' }),
+        legend: { bottom: 2, textStyle: { color: chartTheme.muted } },
+        title: {
+          text: targetYear + ' 學年',
+          left: 'center',
+          top: 6,
+          textStyle: { color: chartTheme.label, fontSize: 14 }
+        },
+        color: ['#1d4ed8', '#fb7185'],
+        series: [{
+          name: '編制占比',
+          type: 'pie',
+          radius: ['42%', '72%'],
+          center: ['50%', '46%'],
+          itemStyle: { borderColor: '#ffffff', borderWidth: 2 },
+          label: { formatter: '{b}\n{d}%' },
+          data: [
+            { name: '編制內', value: insideTotal },
+            { name: '編制外', value: outsideTotal }
+          ]
+        }]
+      });
+
+      staffGenderPieEC.setOption({
+        tooltip: baseTooltip({ formatter: (p) => p.name + '：<b>' + fmt(p.value) + '</b> 人（' + p.percent + '%）' }),
+        legend: { bottom: 2, textStyle: { color: chartTheme.muted } },
+        title: {
+          text: targetYear + ' 學年',
+          left: 'center',
+          top: 6,
+          textStyle: { color: chartTheme.label, fontSize: 14 }
+        },
+        color: ['#2563eb', '#e11d48'],
+        series: [{
+          name: '性別占比',
+          type: 'pie',
+          radius: ['42%', '72%'],
+          center: ['50%', '46%'],
+          itemStyle: { borderColor: '#ffffff', borderWidth: 2 },
+          label: { formatter: '{b}\n{d}%' },
+          data: [
+            { name: '男生', value: Number(genderTotals['男'] || 0) },
+            { name: '女生', value: Number(genderTotals['女'] || 0) }
+          ]
+        }]
+      });
+    }
+
+    function runStaffPie() {
+      if (!state.staffPiePlaying) return;
+      const years = state.dataset.staff.staffYears;
+      if (state.staffPieIndex >= years.length) state.staffPieIndex = 0;
+      renderStaffStructure(years[state.staffPieIndex]);
+      state.staffPieTimer = setTimeout(runStaffPie, getPlaybackSpeed());
+    }
+
+    function stopStaffPie() {
+      state.staffPiePlaying = false;
+      clearTimeout(state.staffPieTimer);
+      document.getElementById('staffPiePlayBtn').textContent = '播放';
+    }
+
+    function toggleStaffPie() {
+      state.staffPiePlaying = !state.staffPiePlaying;
+      if (state.staffPiePlaying) {
+        document.getElementById('staffPiePlayBtn').textContent = '暫停';
+        runStaffPie();
+      } else {
+        stopStaffPie();
+      }
+    }
+
+    function resetStaffPie() {
+      stopStaffPie();
+      const firstYear = state.dataset.staff.staffYears[0];
+      renderStaffStructure(firstYear);
+      document.getElementById('staffPieProgress').style.width = '0%';
+    }
+
+    function renderIndustryFunding() {
+      const d = state.dataset.research;
+      industryFundingEC.setOption({
+        tooltip: baseTooltip({
+          trigger: 'axis',
+          formatter: (params) => params[0].axisValue + ' 年度<br/>' + params[0].marker + '經費：<b>' + fmtMoney(params[0].value) + '</b>'
+        }),
+        grid: { top: 24, left: 72, right: 24, bottom: 40 },
+        xAxis: {
+          type: 'category',
+          data: d.years,
+          axisLabel: { color: chartTheme.axis },
+          axisLine: { lineStyle: { color: chartTheme.axisLine } }
+        },
+        yAxis: {
+          type: 'value',
+          axisLabel: {
+            color: chartTheme.axis,
+            formatter: (v) => (v / 100000000).toFixed(1) + ' 億'
+          },
+          splitLine: { lineStyle: { color: chartTheme.gridLine } }
+        },
+        series: [
+          {
+            name: '產學合作計畫經費(柱)',
+            type: 'bar',
+            data: d.funding,
+            barMaxWidth: 38,
+            itemStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: chartTheme.accentLight },
+                { offset: 1, color: chartTheme.secondary }
+              ])
+            }
+          },
+          {
+            name: '趨勢線',
+            type: 'line',
+            data: d.funding,
+            smooth: true,
+            symbolSize: 8,
+            lineStyle: { width: 3, color: chartTheme.warning },
+            itemStyle: { color: chartTheme.warning },
+            areaStyle: { color: chartTheme.warningSoft },
+            label: {
+              show: true,
+              formatter: (p) => (p.value / 100000000).toFixed(2) + ' 億',
+              color: chartTheme.label,
+              fontSize: 11
+            }
+          }
+        ]
+      });
+    }
+
+    function renderRatio() {
+      const d = state.dataset.other;
+      ratioEC.setOption({
+        tooltip: baseTooltip({ trigger: 'axis' }),
+        legend: { textStyle: { color: chartTheme.muted }, top: 0 },
+        grid: { top: 42, left: 50, right: 20, bottom: 36 },
+        xAxis: {
+          type: 'category',
+          data: d.ratioYears,
+          axisLabel: { color: chartTheme.axis },
+          axisLine: { lineStyle: { color: chartTheme.axisLine } }
+        },
+        yAxis: {
+          type: 'value',
+          min: 18,
+          max: 27,
+          axisLabel: { color: chartTheme.axis },
+          splitLine: { lineStyle: { color: chartTheme.gridLine } }
+        },
+        series: [
+          {
+            name: '日間部生師比',
+            type: 'line',
+            smooth: true,
+            symbolSize: 7,
+            data: d.dayRatio,
+            lineStyle: { color: chartTheme.secondary, width: 2.4 },
+            itemStyle: { color: chartTheme.secondary }
+          },
+          {
+            name: '全校生師比',
+            type: 'line',
+            smooth: true,
+            symbolSize: 7,
+            data: d.schoolRatio,
+            lineStyle: { color: chartTheme.warning, width: 2.4 },
+            itemStyle: { color: chartTheme.warning }
+          }
+        ]
+      });
+    }
+
+    function renderSupport() {
+      const d = state.dataset.other;
+      const keys = Object.keys(d.supportSeries);
+      const values = [];
+      keys.forEach((k, ki) => {
+        d.supportYears.forEach((y, yi) => {
+          values.push([yi, ki, Number(d.supportSeries[k][yi] || 0)]);
+        });
+      });
+      const maxValue = Math.max(...values.map((v) => v[2]));
+      supportEC.setOption({
+        tooltip: baseTooltip({
+          position: 'top',
+          formatter: (p) => d.supportYears[p.data[0]] + ' 學年<br/>' + keys[p.data[1]] + '：<b>' + fmt(p.data[2]) + '</b>'
+        }),
+        grid: { top: 30, left: 126, right: 24, bottom: 44 },
+        xAxis: {
+          type: 'category',
+          data: d.supportYears,
+          axisLabel: { color: chartTheme.axis },
+          axisLine: { lineStyle: { color: chartTheme.axisLine } }
+        },
+        yAxis: {
+          type: 'category',
+          data: keys,
+          axisLabel: { color: chartTheme.axis },
+          axisLine: { lineStyle: { color: chartTheme.axisLine } }
+        },
+        visualMap: {
+          min: 0,
+          max: maxValue,
+          calculable: true,
+          orient: 'horizontal',
+          left: 'center',
+          bottom: 6,
+          textStyle: { color: chartTheme.muted },
+          inRange: { color: chartTheme.heatmap }
+        },
+        series: [{
+          name: '弱勢學生助學熱力',
+          type: 'heatmap',
+          data: values,
+          label: {
+            show: true,
+            color: chartTheme.label,
+            textBorderColor: 'rgba(255, 255, 255, 0.88)',
+            textBorderWidth: 2,
+            formatter: (p) => fmt(p.data[2])
+          },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 8,
+              shadowColor: 'rgba(15, 23, 42, 0.22)'
+            }
+          }
+        }]
+      });
+    }
+
+    function renderLandArea() {
+      const d = state.dataset.other;
+      landAreaEC.setOption({
+        tooltip: baseTooltip({ trigger: 'axis' }),
+        legend: { textStyle: { color: chartTheme.muted }, top: 0 },
+        grid: { top: 44, left: 60, right: 50, bottom: 36 },
+        xAxis: {
+          type: 'category',
+          data: d.landYears,
+          axisLabel: { color: chartTheme.axis },
+          axisLine: { lineStyle: { color: chartTheme.axisLine } }
+        },
+        yAxis: [
+          {
+            type: 'value',
+            name: '每生校地(公頃)',
+            nameTextStyle: { color: chartTheme.axis },
+            axisLabel: { color: chartTheme.axis },
+            splitLine: { lineStyle: { color: chartTheme.gridLine } }
+          },
+          {
+            type: 'value',
+            name: '每生校舍(平方公尺)',
+            nameTextStyle: { color: chartTheme.axis },
+            axisLabel: { color: chartTheme.axis }
+          }
+        ],
+        series: [
+          {
+            name: '每生平均校地面積(公頃)',
+            type: 'bar',
+            data: d.landPerHa,
+            barMaxWidth: 28,
+            itemStyle: { color: chartTheme.accent }
+          },
+          {
+            name: '每生平均校舍面積(平方公尺)',
+            type: 'line',
+            yAxisIndex: 1,
+            smooth: true,
+            symbolSize: 7,
+            data: d.housePerSqm,
+            lineStyle: { color: chartTheme.warning, width: 2.5 },
+            itemStyle: { color: chartTheme.warning }
+          }
+        ]
+      });
+    }
+
+    function fillYearSelectors() {
+      const raceYearSel = document.getElementById('raceYearSel');
+      raceYearSel.innerHTML = state.dataset.student.programData.years.map((y) => '<option value="' + y + '">' + y + ' 學年</option>').join('');
+      raceYearSel.value = state.dataset.student.programData.years[0];
+
+      const pieSel = document.getElementById('pieYearSel');
+      pieSel.innerHTML = state.dataset.student.programData.years.map((y) => '<option value="' + y + '">' + y + ' 學年</option>').join('');
+      pieSel.value = state.dataset.student.programData.years[0];
+      updateProgramPieUI(pieSel.value);
+
+      const collegeSel = document.getElementById('collegeYearSel');
+      collegeSel.innerHTML = state.dataset.student.collegeData.years.map((y) => '<option value="' + y + '">' + y + ' 學年</option>').join('');
+      collegeSel.value = state.dataset.student.collegeData.years[state.dataset.student.collegeData.years.length - 1];
+      state.collegeIndex = state.dataset.student.collegeData.years.indexOf(collegeSel.value);
+
+      const collegePieSel = document.getElementById('collegePieYearSel');
+      collegePieSel.innerHTML = state.dataset.student.collegeData.years.map((y) => '<option value="' + y + '">' + y + ' 學年</option>').join('');
+      collegePieSel.value = collegeSel.value;
+
+      const staffPieSel = document.getElementById('staffPieYearSel');
+      staffPieSel.innerHTML = state.dataset.staff.staffYears.map((y) => '<option value="' + y + '">' + y + ' 學年</option>').join('');
+      staffPieSel.value = state.dataset.staff.staffYears[0];
+      updateStaffPieUI(staffPieSel.value);
+    }
+
+    function renderAllCharts() {
+      normalizeCollegeDataYears();
+
+      buildStudentKpis();
+      buildStaffKpis();
+      buildResearchKpis();
+      buildOtherKpis();
+
+      fillYearSelectors();
+      resetRace();
+      stopProgramPie();
+      stopStaffPie();
+      setCollegeOption(document.getElementById('collegeYearSel').value, false);
+      renderTeacherCompare();
+      renderStaffTotal();
+      renderStaffStructure(document.getElementById('staffPieYearSel').value);
+      renderIndustryFunding();
+      renderRatio();
+      renderSupport();
+      renderLandArea();
+
+      document.getElementById('updatedAt').textContent = '更新時間：' + new Date().toLocaleString('zh-TW');
+    }
+
+    document.getElementById('playBtn').addEventListener('click', toggleRace);
+    document.getElementById('resetBtn').addEventListener('click', resetRace);
+    document.getElementById('programPiePlayBtn').addEventListener('click', toggleProgramPie);
+    document.getElementById('programPieResetBtn').addEventListener('click', resetProgramPie);
+    document.getElementById('staffPiePlayBtn').addEventListener('click', toggleStaffPie);
+    document.getElementById('staffPieResetBtn').addEventListener('click', resetStaffPie);
+    document.getElementById('speedSel').addEventListener('change', () => {
+      if (state.racePlaying) {
+        clearTimeout(state.raceTimer);
+        runRace();
+      }
+      if (state.programPiePlaying) {
+        clearTimeout(state.programPieTimer);
+        runProgramPie();
+      }
+      if (state.staffPiePlaying) {
+        clearTimeout(state.staffPieTimer);
+        runStaffPie();
+      }
+      if (state.collegePlaying) {
+        clearTimeout(state.collegeTimer);
+        runCollegeRank();
+      }
+    });
+    document.getElementById('raceYearSel').addEventListener('change', () => {
+      const year = document.getElementById('raceYearSel').value;
+      const years = state.dataset.student.programData.years;
+      const idx = Math.max(0, years.indexOf(year));
+      state.raceIndex = (idx + 1) % years.length;
+      setRaceOption(year, false, true);
+    });
+    document.getElementById('pieYearSel').addEventListener('change', () => {
+      const year = document.getElementById('pieYearSel').value;
+      const years = state.dataset.student.programData.years;
+      const idx = Math.max(0, years.indexOf(year));
+      state.raceIndex = (idx + 1) % years.length;
+      setRaceOption(year, false, false);
+      renderStudentPie();
+    });
+    document.getElementById('collegePlayBtn').addEventListener('click', toggleCollegeRank);
+    document.getElementById('collegeResetBtn').addEventListener('click', resetCollegeRank);
+    document.getElementById('collegePiePlayBtn').addEventListener('click', toggleCollegeRank);
+    document.getElementById('collegePieResetBtn').addEventListener('click', resetCollegeRank);
+    document.getElementById('collegeYearSel').addEventListener('change', () => {
+      const years = state.dataset.student.collegeData.years;
+      const selectedYear = document.getElementById('collegeYearSel').value;
+      state.collegeIndex = Math.max(0, years.indexOf(selectedYear));
+      setCollegeOption(selectedYear, true);
+    });
+    document.getElementById('collegePieYearSel').addEventListener('change', () => {
+      const years = state.dataset.student.collegeData.years;
+      const selectedYear = document.getElementById('collegePieYearSel').value;
+      state.collegeIndex = Math.max(0, years.indexOf(selectedYear));
+      setCollegeOption(selectedYear, true);
+    });
+    document.getElementById('staffPieYearSel').addEventListener('change', () => {
+      const year = document.getElementById('staffPieYearSel').value;
+      renderStaffStructure(year);
+    });
+
+    window.addEventListener('resize', () => {
+      raceEC.resize();
+      programPieEC.resize();
+      collegeBarEC.resize();
+      collegePieEC.resize();
+      teacherCompareEC.resize();
+      staffTotalEC.resize();
+      staffStatusPieEC.resize();
+      staffGenderPieEC.resize();
+      industryFundingEC.resize();
+      ratioEC.resize();
+      supportEC.resize();
+      landAreaEC.resize();
+    });
+
+    renderAllCharts();
+
+    window.addEventListener('load', () => {
+      state.racePlaying = true;
+      document.getElementById('playBtn').textContent = '暫停';
+      runRace();
+    });
+  </script>
+</body>
+</html>

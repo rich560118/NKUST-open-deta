@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NKUST校務數據公開</title>
+  <meta http-equiv="refresh" content="0; url=education_dynamic_chart.html" />
+  <script>
+    window.location.replace('education_dynamic_chart.html');
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Microsoft JhengHei', 'PingFang TC', 'Noto Sans TC', sans-serif;
+      background: #eef2f7;
+      color: #333;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: linear-gradient(135deg, #0d3b66 0%, #1a73c4 100%);
+      color: #fff;
+      padding: 22px 30px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .header-logo {
+      width: 60px;
+      height: 60px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+    .header-text h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .header-text p  { font-size: 13px; opacity: .8; }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 1200px; margin: 24px auto; padding: 0 20px 40px; }
+
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.08);
+      padding: 22px 24px;
+      margin-bottom: 24px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0d3b66;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 18px;
+      background: #1a73c4;
+      border-radius: 2px;
+    }
+
+    /* ── BAR RACE CONTROLS ── */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .btn {
+      padding: 7px 22px;
+      border: none;
+      border-radius: 22px;
+      cursor: pointer;
+      font-size: 14px;
+      font-family: inherit;
+      font-weight: 600;
+      transition: all .25s;
+      user-select: none;
+    }
+    .btn-play  { background: #1a73c4; color: #fff; }
+    .btn-play:hover  { background: #0d5ca6; transform: scale(1.04); }
+    .btn-pause { background: #e55039; color: #fff; }
+    .btn-pause:hover { background: #c0392b; }
+    .btn-reset { background: #ecf0f1; color: #555; }
+    .btn-reset:hover { background: #dce3e8; }
+
+    .year-badge {
+      background: #0d3b66;
+      color: #fff;
+      border-radius: 10px;
+      padding: 6px 18px;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .speed-label { font-size: 13px; color: #777; }
+    .speed-select {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* ── PROGRESS BAR ── */
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .progress-bar {
+      flex: 1;
+      height: 6px;
+      background: #dde4ee;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #1a73c4, #5db0f7);
+      border-radius: 3px;
+      transition: width .4s;
+    }
+    .progress-year {
+      font-size: 12px;
+      color: #999;
+      width: 60px;
+      text-align: right;
+    }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .tab-btn {
+      padding: 6px 16px;
+      border: 2px solid #1a73c4;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 13px;
+      font-family: inherit;
+      background: #fff;
+      color: #1a73c4;
+      transition: all .2s;
+    }
+    .tab-btn.active, .tab-btn:hover { background: #1a73c4; color: #fff; }
+
+    /* ── STAT CARDS ── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.07);
+      padding: 16px;
+      text-align: center;
+      border-top: 4px solid var(--c);
+    }
+    .stat-card .val { font-size: 26px; font-weight: 700; color: var(--c); }
+    .stat-card .lbl { font-size: 12px; color: #777; margin-top: 4px; }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center;
+      color: #aaa;
+      font-size: 12px;
+      margin-top: 30px;
+    }
+
+    /* CHART divs */
+    #raceChart   { width: 100%; height: 520px; }
+    #lineChart   { width: 100%; height: 400px; }
+    #stackChart  { width: 100%; height: 400px; }
+    #pieChart    { width: 100%; height: 380px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">🎓</div>
+  <div class="header-text">
+    <h1>國立高雄科技大學　學制在學學生數</h1>
+    <p>資料來源：技專資料庫表 4-2（10 月填報）　｜　學年度：107 ~ 112</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ── STAT CARDS ── -->
+  <div class="stat-grid" id="statCards"></div>
+
+  <!-- ── BAR RACE ── -->
+  <div class="card">
+    <div class="card-title">各學制在學學生人數動態圖</div>
+
+    <div class="controls">
+      <button class="btn btn-play" id="playBtn" onclick="togglePlay()">▶ 播放</button>
+      <button class="btn btn-reset" onclick="resetRace()">↺ 重置</button>
+      <div class="year-badge"><span id="yearDisplay">107</span> 學年度</div>
+      <span class="speed-label">速度：</span>
+      <select class="speed-select" id="speedSel" onchange="updateSpeed()">
+        <option value="2000">慢速</option>
+        <option value="1500" selected>正常</option>
+        <option value="900">快速</option>
+        <option value="500">超快</option>
+      </select>
+    </div>
+
+    <div class="progress-wrap">
+      <span class="progress-year" style="width:70px;text-align:left;">107學年</span>
+      <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
+      <span class="progress-year">112學年</span>
+    </div>
+
+    <div id="raceChart"></div>
+  </div>
+
+  <!-- ── LINE CHART ── -->
+  <div class="card">
+    <div class="card-title">各學制在學學生數趨勢折線圖</div>
+    <div class="tabs" id="lineTabs">
+      <button class="tab-btn active" data-filter="">全部學制</button>
+      <button class="tab-btn" data-filter="日間部">日間部</button>
+      <button class="tab-btn" data-filter="進修">進修部／進修學院</button>
+      <button class="tab-btn" data-filter="碩士在職">碩士在職</button>
+    </div>
+    <div id="lineChart"></div>
+  </div>
+
+  <!-- ── STACKED BAR ── -->
+  <div class="card">
+    <div class="card-title">各學年度學制組成堆疊長條圖</div>
+    <div id="stackChart"></div>
+  </div>
+
+  <!-- ── PIE CHART ── -->
+  <div class="card">
+    <div class="card-title">各學制學生數佔比（圓餅圖，點選學年切換）</div>
+    <div class="tabs" id="pieTabs">
+      <button class="tab-btn active" data-year="107">107學年</button>
+      <button class="tab-btn" data-year="108">108學年</button>
+      <button class="tab-btn" data-year="109">109學年</button>
+      <button class="tab-btn" data-year="110">110學年</button>
+      <button class="tab-btn" data-year="111">111學年</button>
+      <button class="tab-btn" data-year="112">112學年</button>
+    </div>
+    <div id="pieChart"></div>
+  </div>
+
+  <div class="footer">
+    資料來源：技專資料庫表 4-2（10月填報）｜國立高雄科技大學｜圖表以 Apache ECharts 製作
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════════════════════════
+const programs = ['日間部五專','日間部二技','日間部四技','日間部碩士','日間部博士','進修部二技','進修部四技','進修學院二技','碩士在職專班'];
+const years    = ['107','108','109','110','111','112'];
+const rawData  = {
+  '107': [639, 456,17333,2523, 551, 202,3538, 736,2032],
+  '108': [701, 402,17288,2409, 548, 119,3703, 728,2132],
+  '109': [739, 394,17294,2379, 563, 112,3947, 690,2010],
+  '110': [798, 439,17453,2530, 621, 113,3938, 687,2010],
+  '111': [867, 430,17469,2618, 598, 105,3751, 595,2010],
+  '112': [874, 454,17471,2608, 564, 342,3527, 286,1943],
+};
+const totals = years.map(y => rawData[y].reduce((s,v)=>s+v,0));
+
+const palette = [
+  '#e74c3c','#e67e22','#f39c12','#27ae60','#16a085',
+  '#2980b9','#8e44ad','#2c3e50','#c0392b'
+];
+
+// ════════════════════════════════════════════════════════════
+// STAT CARDS
+// ════════════════════════════════════════════════════════════
+(function buildStats(){
+  const grid = document.getElementById('statCards');
+  const lastYear = '112';
+  const prevYear = '111';
+  const defs = [
+    { label:'112學年總人數', val: totals[5].toLocaleString()+'人', color:'#1a73c4' },
+    { label:'最大學制（四技）', val: rawData[lastYear][2].toLocaleString()+'人', color:'#27ae60' },
+    { label:'五年平均成長率', val: (((totals[5]-totals[0])/totals[0])*100).toFixed(1)+'%', color:'#e67e22' },
+    { label:'111→112 人數變化', val: (totals[5]-totals[4]>0?'+':'')+((totals[5]-totals[4]).toLocaleString())+'人', color: totals[5]>=totals[4]?'#27ae60':'#e74c3c' },
+  ];
+  defs.forEach(d=>{
+    const el = document.createElement('div');
+    el.className = 'stat-card';
+    el.style.setProperty('--c', d.color);
+    el.innerHTML = `<div class="val">${d.val}</div><div class="lbl">${d.label}</div>`;
+    grid.appendChild(el);
+  });
+})();
+
+// ════════════════════════════════════════════════════════════
+// BAR RACE CHART
+// ════════════════════════════════════════════════════════════
+const raceEC = echarts.init(document.getElementById('raceChart'));
+let raceIdx   = 0;
+let playing   = false;
+let raceTimer = null;
+
+function getRaceSorted(yr){
+  return programs
+    .map((n,i)=>({ name:n, value:rawData[yr][i], color:palette[i] }))
+    .sort((a,b)=>a.value - b.value);
+}
+
+function setRaceOption(yr, animate){
+  const sorted = getRaceSorted(yr);
+  document.getElementById('yearDisplay').textContent = yr;
+  const pct = ((years.indexOf(yr))/(years.length-1)*100).toFixed(1);
+  document.getElementById('progFill').style.width = pct+'%';
+
+  raceEC.setOption({
+    grid:{ top:10, bottom:30, left:130, right:100 },
+    tooltip:{
+      trigger:'axis',
+      axisPointer:{ type:'none' },
+      formatter: p => `${p[0].name}：<b>${p[0].value.toLocaleString()}</b> 人`
+    },
+    xAxis:{
+      max:'dataMax',
+      axisLabel:{ formatter: v=>v.toLocaleString(), fontSize:11 },
+      splitLine:{ lineStyle:{ color:'#eee' } }
+    },
+    yAxis:{
+      type:'category',
+      data: sorted.map(d=>d.name),
+      inverse: false,
+      animationDuration: animate ? 400 : 0,
+      animationDurationUpdate: animate ? 1000 : 0,
+      axisLabel:{ fontSize:13 }
+    },
+    series:[{
+      realtimeSort: true,
+      type:'bar',
+      data: sorted.map(d=>({ value:d.value, itemStyle:{ color:d.color } })),
+      label:{
+        show:true,
+        position:'right',
+        formatter: p => p.value.toLocaleString()+' 人',
+        fontSize:12,
+        color:'#444'
+      },
+      barMaxWidth: 46,
+    }],
+    graphic:[{
+      type:'text',
+      right:14,
+      bottom:48,
+      style:{
+        text: yr+'\n學年度',
+        font:'bold 40px Microsoft JhengHei',
+        fill:'rgba(26,115,196,.18)',
+        textAlign:'right'
+      },
+      z:100
+    }],
+    animationDuration: 0,
+    animationDurationUpdate: animate ? 1100 : 0,
+    animationEasing:'linear',
+    animationEasingUpdate:'linear',
+  });
+}
+
+function togglePlay(){
+  playing = !playing;
+  const btn = document.getElementById('playBtn');
+  if(playing){
+    btn.textContent = '⏸ 暫停';
+    btn.className = 'btn btn-pause';
+    runRace();
+  } else {
+    btn.textContent = '▶ 播放';
+    btn.className = 'btn btn-play';
+    clearTimeout(raceTimer);
+  }
+}
+
+function runRace(){
+  if(!playing) return;
+  if(raceIdx >= years.length){
+    raceIdx = 0;
+  }
+  setRaceOption(years[raceIdx], raceIdx > 0);
+  raceIdx++;
+  const spd = parseInt(document.getElementById('speedSel').value,10);
+  raceTimer = setTimeout(runRace, spd);
+}
+
+function resetRace(){
+  playing = false;
+  clearTimeout(raceTimer);
+  raceIdx = 0;
+  document.getElementById('playBtn').textContent = '▶ 播放';
+  document.getElementById('playBtn').className = 'btn btn-play';
+  setRaceOption(years[0], false);
+  document.getElementById('progFill').style.width = '0%';
+}
+
+function updateSpeed(){
+  if(playing){ clearTimeout(raceTimer); runRace(); }
+}
+
+setRaceOption(years[0], false);
+
+// 開啟網頁自動播放
+window.addEventListener('load', () => {
+  playing = true;
+  const btn = document.getElementById('playBtn');
+  btn.textContent = '⏸ 暫停';
+  btn.className = 'btn btn-pause';
+  runRace();
+});
+
+// ════════════════════════════════════════════════════════════
+// LINE CHART
+// ════════════════════════════════════════════════════════════
+const lineEC = echarts.init(document.getElementById('lineChart'));
+
+function buildLineSeries(filter){
+  return programs
+    .filter(p => !filter || p.includes(filter))
+    .map(p=>{
+      const i = programs.indexOf(p);
+      return {
+        name:p, type:'line', smooth:true,
+        data: years.map(y=>rawData[y][i]),
+        lineStyle:{ width:2.5 },
+        symbol:'circle', symbolSize:7,
+        itemStyle:{ color:palette[i] },
+        emphasis:{ focus:'series' }
+      };
+    });
+}
+
+function applyLineOption(filter){
+  const ser = buildLineSeries(filter);
+  lineEC.setOption({
+    tooltip:{
+      trigger:'axis',
+      formatter: params=>{
+        let s=`<b>${params[0].axisValue} 學年度</b><br/>`;
+        params.forEach(p=>{ s+=`${p.marker}${p.seriesName}：<b>${p.value.toLocaleString()}</b> 人<br/>`; });
+        return s;
+      }
+    },
+    legend:{ type:'scroll', bottom:0, data:ser.map(s=>s.name) },
+    grid:{ top:20, bottom:60, left:80, right:20 },
+    xAxis:{ type:'category', data:years, axisLabel:{ formatter:v=>v+'\n學年' } },
+    yAxis:{ type:'value', axisLabel:{ formatter:v=>v.toLocaleString() } },
+    series: ser,
+    animationDuration:800,
+  }, true);
+}
+
+applyLineOption('');
+
+document.getElementById('lineTabs').addEventListener('click', e=>{
+  const btn = e.target.closest('.tab-btn');
+  if(!btn) return;
+  document.querySelectorAll('#lineTabs .tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  applyLineOption(btn.dataset.filter);
+});
+
+// ════════════════════════════════════════════════════════════
+// STACKED BAR
+// ════════════════════════════════════════════════════════════
+const stackEC = echarts.init(document.getElementById('stackChart'));
+
+stackEC.setOption({
+  tooltip:{
+    trigger:'axis',
+    axisPointer:{ type:'shadow' },
+    formatter: params=>{
+      let total=0, s=`<b>${params[0].axisValue} 學年度</b><br/>`;
+      params.forEach(p=>{ s+=`${p.marker}${p.seriesName}：<b>${p.value.toLocaleString()}</b> 人<br/>`; total+=p.value; });
+      s+=`<hr style="margin:4px 0"/>總計：<b>${total.toLocaleString()}</b> 人`;
+      return s;
+    }
+  },
+  legend:{ type:'scroll', bottom:0, data:programs },
+  grid:{ top:20, bottom:70, left:90, right:20 },
+  xAxis:{ type:'category', data:years, axisLabel:{ formatter:v=>v+' 學年' } },
+  yAxis:{ type:'value', axisLabel:{ formatter:v=>v.toLocaleString() } },
+  series: programs.map((p,i)=>({
+    name:p, type:'bar', stack:'total',
+    data: years.map(y=>rawData[y][i]),
+    itemStyle:{ color:palette[i] },
+    emphasis:{ focus:'series' },
+    label:{
+      show:true,
+      formatter: p=>(p.value>500?p.value.toLocaleString():''),
+      fontSize:11, color:'#fff'
+    }
+  })),
+  animationDuration:800,
+});
+
+// ════════════════════════════════════════════════════════════
+// PIE CHART
+// ════════════════════════════════════════════════════════════
+const pieEC = echarts.init(document.getElementById('pieChart'));
+
+function applyPie(yr){
+  pieEC.setOption({
+    tooltip:{ trigger:'item', formatter:'{b}：{c} 人（{d}%）' },
+    legend:{ type:'scroll', orient:'vertical', right:10, top:'middle' },
+    series:[{
+      type:'pie',
+      radius:['35%','70%'],
+      center:['40%','50%'],
+      avoidLabelOverlap:true,
+      itemStyle:{ borderRadius:6, borderColor:'#fff', borderWidth:2 },
+      label:{ show:false },
+      emphasis:{
+        label:{ show:true, fontSize:14, fontWeight:'bold' },
+        itemStyle:{ shadowBlur:10, shadowOffsetX:0, shadowColor:'rgba(0,0,0,.3)' }
+      },
+      data: programs.map((p,i)=>({
+        name:p, value:rawData[yr][i], itemStyle:{ color:palette[i] }
+      })),
+      animationType:'expansion',
+      animationDuration:800,
+    }],
+    title:{ text:yr+' 學年度　各學制佔比', left:'center', top:6, textStyle:{ fontSize:14, color:'#0d3b66' } }
+  }, true);
+}
+
+applyPie('107');
+
+document.getElementById('pieTabs').addEventListener('click', e=>{
+  const btn = e.target.closest('.tab-btn');
+  if(!btn) return;
+  document.querySelectorAll('#pieTabs .tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  applyPie(btn.dataset.year);
+});
+
+// ════════════════════════════════════════════════════════════
+// RESPONSIVE RESIZE
+// ════════════════════════════════════════════════════════════
+window.addEventListener('resize',()=>{
+  raceEC.resize(); lineEC.resize(); stackEC.resize(); pieEC.resize();
+});
+</script>
+</body>
+</html>
