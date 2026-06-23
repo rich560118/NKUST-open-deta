@@ -1069,12 +1069,16 @@
           type: 'category',
           data: [year],
           axisLabel: { color: chartTheme.axis, fontSize: 12, fontWeight: 'bold' },
-          axisLine: { lineStyle: { color: chartTheme.axisLine } }
+          axisLine: { lineStyle: { color: chartTheme.axisLine } },
+          animationDurationUpdate: 300,
+          animationEasing: 'cubicOut'
         },
         yAxis: {
           type: 'value',
           axisLabel: { color: chartTheme.axis, fontSize: 12, fontWeight: 'bold' },
-          axisLine: { lineStyle: { color: chartTheme.axisLine } }
+          axisLine: { lineStyle: { color: chartTheme.axisLine } },
+          animationDurationUpdate: 300,
+          animationEasing: 'cubicOut'
         },
         series: [
           {
@@ -1095,7 +1099,10 @@
                 shadowBlur: 8,
                 shadowColor: 'rgba(15, 23, 42, 0.22)'
               }
-            }
+            },
+            animation: true,
+            animationDurationUpdate: 900,
+            animationEasing: 'cubicOut'
           },
           {
             name: '退學人數',
@@ -1115,13 +1122,12 @@
                 shadowBlur: 8,
                 shadowColor: 'rgba(15, 23, 42, 0.22)'
               }
-            }
+            },
+            animation: true,
+            animationDurationUpdate: 900,
+            animationEasing: 'cubicOut'
           }
-        ],
-        animation: true,
-        animationDuration: animate ? 350 : 0,
-        animationDurationUpdate: animate ? 900 : 0,
-        animationEasing: 'cubicOut'
+        ]
       });
     }
 
