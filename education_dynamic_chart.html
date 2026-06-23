@@ -1846,7 +1846,7 @@
       const year = document.getElementById('withdrawalYearSel').value;
       const years = state.dataset.other.withdrawalYears;
       const idx = Math.max(0, years.indexOf(year));
-      state.withdrawalIndex = (idx + 1) % years.length;
+      state.withdrawalIndex = idx;
       setWithdrawalOption(year, false, true);
     });
 
