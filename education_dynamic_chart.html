@@ -1052,10 +1052,14 @@
 
       withdrawalEC.setOption({
         tooltip: baseTooltip({
-          position: 'top',
-          formatter: (p) => d.withdrawalYears[p.data[0]] + ' 學年<br/>' + Object.keys(d.withdrawalSeries)[p.data[1]] + '：<b>' + fmt(p.data[2]) + '</b>'
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' },
+          formatter: (params) => {
+            return params[0].axisValue + ' 學年<br/>' +
+                   params[0].seriesName + '：<b>' + fmt(params[0].value) + '</b>';
+          }
         }),
-        grid: { top: 30, left: 126, right: 24, bottom: 100 },
+        grid: { top: 30, left: 20, right: 20, bottom: 30 },
         xAxis: {
           type: 'category',
           data: d.withdrawalYears,
@@ -1063,33 +1067,25 @@
           axisLine: { lineStyle: { color: chartTheme.axisLine } }
         },
         yAxis: {
-          type: 'category',
-          data: Object.keys(d.withdrawalSeries),
+          type: 'value',
           axisLabel: { color: chartTheme.axis, fontSize: 12, fontWeight: 'bold' },
           axisLine: { lineStyle: { color: chartTheme.axisLine } }
         },
-        visualMap: {
-          min: 0,
-          max: Math.max(...Object.values(d.withdrawalSeries).flat()),
-          calculable: true,
-          orient: 'horizontal',
-          left: 'center',
-          bottom: 6,
-          textStyle: { color: chartTheme.muted },
-          inRange: { color: chartTheme.heatmap }
-        },
         series: [{
-          name: '休退學人數熱力',
-          type: 'heatmap',
-          data: Object.keys(d.withdrawalSeries).map((k, ki) => 
-            d.withdrawalYears.map((y, yi) => [yi, ki, Number(d.withdrawalSeries[k][yi] || 0)])
-          ).flat(),
+          name: '休退學人數',
+          type: 'bar',
+          data: d.withdrawalSeries['休退學人數'],
+          itemStyle: {
+            color: function(params) {
+              // 使用調色盤中的顏色，根據索引循環使用
+              return state.palette[params.dataIndex % state.palette.length];
+            }
+          },
           label: {
             show: true,
+            position: 'top',
             color: chartTheme.label,
-            textBorderColor: 'rgba(255, 255, 255, 0.88)',
-            textBorderWidth: 2,
-            formatter: (p) => fmt(p.data[2])
+            formatter: (p) => fmt(p.value)
           },
           emphasis: {
             itemStyle: {
