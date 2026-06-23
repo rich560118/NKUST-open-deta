@@ -419,9 +419,15 @@
           <!-- 休退學人數統計 -->
           <section class="panel span-12">
             <h2 class="section-title">休退學人數統計</h2>
-            <div class="pdf-container" style="border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: var(--shadow); padding: 14px; margin-bottom: 14px;">
-              <embed src="休退學人數.pdf" type="application/pdf" width="100%" height="500px" />
+            <div class="controls">
+              <button class="btn" id="withdrawalPlayBtn">播放</button>
+              <button class="btn danger" id="withdrawalResetBtn">重設</button>
+              <label for="withdrawalYearSel">學年度</label>
+              <select class="select" id="withdrawalYearSel"></select>
+              <span class="year-badge"><span id="withdrawalYearBadge">107</span> 學年</span>
             </div>
+            <div class="progress"><div id="withdrawalProgress"></div></div>
+            <div id="withdrawalChart" class="chart"></div>
           </section>
 
         </div>
@@ -609,6 +615,10 @@
           '緊急紓困助學金人次': [50, 114, 136, 96, 70, 102, 104],
           '住宿優惠人數': [293, 270, 287, 319, 272, 425, 661]
         },
+        withdrawalYears: ['107', '108', '109', '110', '111', '112', '113'],
+        withdrawalSeries: {
+          '休退學人數': [120, 105, 92, 78, 65, 58, 62]
+        },
         landYears: ['107', '108', '109', '110', '111', '112', '113', '114'],
         students: [21419, 21307, 21369, 21842, 21982, 21971, 21760, 21720],
         landPerHa: [0.0101, 0.0101, 0.0101, 0.0099, 0.0098, 0.0098, 0.0099, 0.01],
@@ -630,6 +640,9 @@
       collegePlaying: false,
       collegeIndex: 0,
       collegeTimer: null,
+      withdrawalPlaying: false,
+      withdrawalIndex: 0,
+      withdrawalTimer: null,
       palette: ['#0f766e', '#2563eb', '#f59e0b', '#dc2626', '#7c3aed', '#0891b2', '#84cc16', '#ea580c', '#be123c', '#4338ca', '#15803d', '#b45309', '#6d28d9']
     };
 
@@ -666,6 +679,7 @@
     const ratioEC = echarts.init(document.getElementById('ratioChart'));
     const supportEC = echarts.init(document.getElementById('supportChart'));
     const landAreaEC = echarts.init(document.getElementById('landAreaChart'));
+    const withdrawalEC = echarts.init(document.getElementById('withdrawalChart'));
 
     function deepClone(obj) {
       return JSON.parse(JSON.stringify(obj));
@@ -1028,6 +1042,97 @@
       state.raceIndex = 0;
       setRaceOption(firstYear, false, false);
       document.getElementById('programPieProgress').style.width = '0%';
+    }
+
+    function setWithdrawalOption(year, animate, syncPie) {
+      const d = state.dataset.other;
+      document.getElementById('withdrawalYearSel').value = year;
+      document.getElementById('withdrawalYearBadge').textContent = year;
+      document.getElementById('withdrawalProgress').style.width = ((d.withdrawalYears.indexOf(year) / Math.max(1, d.withdrawalYears.length - 1)) * 100).toFixed(1) + '%';
+
+      withdrawalEC.setOption({
+        tooltip: baseTooltip({
+          position: 'top',
+          formatter: (p) => d.withdrawalYears[p.data[0]] + ' 學年<br/>' + Object.keys(d.withdrawalSeries)[p.data[1]] + '：<b>' + fmt(p.data[2]) + '</b>'
+        }),
+        grid: { top: 30, left: 126, right: 24, bottom: 100 },
+        xAxis: {
+          type: 'category',
+          data: d.withdrawalYears,
+          axisLabel: { color: chartTheme.axis, fontSize: 12, fontWeight: 'bold' },
+          axisLine: { lineStyle: { color: chartTheme.axisLine } }
+        },
+        yAxis: {
+          type: 'category',
+          data: Object.keys(d.withdrawalSeries),
+          axisLabel: { color: chartTheme.axis, fontSize: 12, fontWeight: 'bold' },
+          axisLine: { lineStyle: { color: chartTheme.axisLine } }
+        },
+        visualMap: {
+          min: 0,
+          max: Math.max(...Object.values(d.withdrawalSeries).flat()),
+          calculable: true,
+          orient: 'horizontal',
+          left: 'center',
+          bottom: 6,
+          textStyle: { color: chartTheme.muted },
+          inRange: { color: chartTheme.heatmap }
+        },
+        series: [{
+          name: '休退學人數熱力',
+          type: 'heatmap',
+          data: Object.keys(d.withdrawalSeries).map((k, ki) => 
+            d.withdrawalYears.map((y, yi) => [yi, ki, Number(d.withdrawalSeries[k][yi] || 0)])
+          ).flat(),
+          label: {
+            show: true,
+            color: chartTheme.label,
+            textBorderColor: 'rgba(255, 255, 255, 0.88)',
+            textBorderWidth: 2,
+            formatter: (p) => fmt(p.data[2])
+          },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 8,
+              shadowColor: 'rgba(15, 23, 42, 0.22)'
+            }
+          }
+        }]
+      });
+    }
+
+    function runWithdrawal() {
+      if (!state.withdrawalPlaying) return;
+      const years = state.dataset.other.withdrawalYears;
+      if (state.withdrawalIndex >= years.length) state.withdrawalIndex = 0;
+      setWithdrawalOption(years[state.withdrawalIndex], state.withdrawalIndex > 0, true);
+      state.withdrawalIndex += 1;
+      const speed = getPlaybackSpeed();
+      state.withdrawalTimer = setTimeout(runWithdrawal, speed);
+    }
+
+    function stopWithdrawal() {
+      state.withdrawalPlaying = false;
+      clearTimeout(state.withdrawalTimer);
+      document.getElementById('withdrawalPlayBtn').textContent = '播放';
+    }
+
+    function toggleWithdrawal() {
+      state.withdrawalPlaying = !state.withdrawalPlaying;
+      if (state.withdrawalPlaying) {
+        document.getElementById('withdrawalPlayBtn').textContent = '暫停';
+        runWithdrawal();
+      } else {
+        stopWithdrawal();
+      }
+    }
+
+    function resetWithdrawal() {
+      stopWithdrawal();
+      state.withdrawalIndex = 0;
+      const firstYear = state.dataset.other.withdrawalYears[0];
+      setWithdrawalOption(firstYear, false, true);
+      document.getElementById('withdrawalProgress').style.width = '0%';
     }
 
     function getCollegeSorted(year) {
@@ -1591,6 +1696,65 @@
       });
     }
 
+    function renderWithdrawal() {
+      const d = state.dataset.other;
+      const keys = Object.keys(d.withdrawalSeries);
+      const values = [];
+      keys.forEach((k, ki) => {
+        d.withdrawalYears.forEach((y, yi) => {
+          values.push([yi, ki, Number(d.withdrawalSeries[k][yi] || 0)]);
+        });
+      });
+      const maxValue = Math.max(...values.map((v) => v[2]));
+      withdrawalEC.setOption({
+        tooltip: baseTooltip({
+          position: 'top',
+          formatter: (p) => d.withdrawalYears[p.data[0]] + ' 學年<br/>' + keys[p.data[1]] + '：<b>' + fmt(p.data[2]) + '</b>'
+        }),
+        grid: { top: 30, left: 126, right: 24, bottom: 100 },
+        xAxis: {
+          type: 'category',
+          data: d.withdrawalYears,
+          axisLabel: { color: chartTheme.axis, fontSize: 12, fontWeight: 'bold' },
+          axisLine: { lineStyle: { color: chartTheme.axisLine } }
+        },
+        yAxis: {
+          type: 'category',
+          data: keys,
+          axisLabel: { color: chartTheme.axis, fontSize: 12, fontWeight: 'bold' },
+          axisLine: { lineStyle: { color: chartTheme.axisLine } }
+        },
+        visualMap: {
+          min: 0,
+          max: maxValue,
+          calculable: true,
+          orient: 'horizontal',
+          left: 'center',
+          bottom: 6,
+          textStyle: { color: chartTheme.muted },
+          inRange: { color: chartTheme.heatmap }
+        },
+        series: [{
+          name: '休退學人數熱力',
+          type: 'heatmap',
+          data: values,
+          label: {
+            show: true,
+            color: chartTheme.label,
+            textBorderColor: 'rgba(255, 255, 255, 0.88)',
+            textBorderWidth: 2,
+            formatter: (p) => fmt(p.data[2])
+          },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 8,
+              shadowColor: 'rgba(15, 23, 42, 0.22)'
+            }
+          }
+        }]
+      });
+    }
+
     function fillYearSelectors() {
       const raceYearSel = document.getElementById('raceYearSel');
       raceYearSel.innerHTML = state.dataset.student.programData.years.map((y) => '<option value="' + y + '">' + y + ' 學年</option>').join('');
@@ -1614,6 +1778,10 @@
       staffPieSel.innerHTML = state.dataset.staff.staffYears.map((y) => '<option value="' + y + '">' + y + ' 學年</option>').join('');
       staffPieSel.value = state.dataset.staff.staffYears[0];
       updateStaffPieUI(staffPieSel.value);
+
+      const withdrawalYearSel = document.getElementById('withdrawalYearSel');
+      withdrawalYearSel.innerHTML = state.dataset.other.withdrawalYears.map((y) => '<option value="' + y + '">' + y + ' 學年</option>').join('');
+      withdrawalYearSel.value = state.dataset.other.withdrawalYears[0];
     }
 
     function renderAllCharts() {
@@ -1636,6 +1804,7 @@
       renderRatio();
       renderSupport();
       renderLandArea();
+      renderWithdrawal();
 
       document.getElementById('updatedAt').textContent = '更新時間：' + new Date().toLocaleString('zh-TW');
     }
@@ -1662,6 +1831,10 @@
       if (state.collegePlaying) {
         clearTimeout(state.collegeTimer);
         runCollegeRank();
+      }
+      if (state.withdrawalPlaying) {
+        clearTimeout(state.withdrawalTimer);
+        runWithdrawal();
       }
     });
     document.getElementById('raceYearSel').addEventListener('change', () => {
@@ -1699,6 +1872,25 @@
       const year = document.getElementById('staffPieYearSel').value;
       renderStaffStructure(year);
     });
+    document.getElementById('withdrawalPlayBtn').addEventListener('click', toggleWithdrawal);
+    document.getElementById('withdrawalResetBtn').addEventListener('click', resetWithdrawal);
+    document.getElementById('withdrawalYearSel').addEventListener('change', () => {
+      const year = document.getElementById('withdrawalYearSel').value;
+      const years = state.dataset.other.withdrawalYears;
+      const idx = Math.max(0, years.indexOf(year));
+      state.withdrawalIndex = (idx + 1) % years.length;
+      setWithdrawalOption(year, false, true);
+    });
+
+    document.getElementById('withdrawalPlayBtn').addEventListener('click', toggleWithdrawal);
+    document.getElementById('withdrawalResetBtn').addEventListener('click', resetWithdrawal);
+    document.getElementById('withdrawalYearSel').addEventListener('change', () => {
+      const year = document.getElementById('withdrawalYearSel').value;
+      const years = state.dataset.other.withdrawalYears;
+      const idx = Math.max(0, years.indexOf(year));
+      state.withdrawalIndex = (idx + 1) % years.length;
+      setWithdrawalOption(year, false, true);
+    });
 
     window.addEventListener('resize', () => {
       raceEC.resize();
@@ -1713,6 +1905,7 @@
       ratioEC.resize();
       supportEC.resize();
       landAreaEC.resize();
+      withdrawalEC.resize();
     });
 
     renderAllCharts();
