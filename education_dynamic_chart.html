@@ -1067,7 +1067,7 @@
         grid: { top: 30, left: 20, right: 20, bottom: 30 },
         xAxis: {
           type: 'category',
-          data: d.withdrawalYears,
+          data: [year],
           axisLabel: { color: chartTheme.axis, fontSize: 12, fontWeight: 'bold' },
           axisLine: { lineStyle: { color: chartTheme.axisLine } }
         },
@@ -1080,7 +1080,7 @@
           {
             name: '休學人數',
             type: 'bar',
-            data: d.withdrawalSeries['休學人數'],
+            data: [d.withdrawalSeries['休學人數'][d.withdrawalYears.indexOf(year)]],
             itemStyle: {
               color: '#dc2626',
             },
@@ -1100,7 +1100,7 @@
           {
             name: '退學人數',
             type: 'bar',
-            data: d.withdrawalSeries['退學人數'],
+            data: [d.withdrawalSeries['退學人數'][d.withdrawalYears.indexOf(year)]],
             itemStyle: {
               color: '#2563eb',
             },
