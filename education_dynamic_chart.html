@@ -615,9 +615,10 @@
           '緊急紓困助學金人次': [50, 114, 136, 96, 70, 102, 104],
           '住宿優惠人數': [293, 270, 287, 319, 272, 425, 661]
         },
-        withdrawalYears: ['107', '108', '109', '110', '111', '112', '113'],
+        withdrawalYears: ['107-1','107-2', '108-1', '108-2','109-1','109-2', '110-1','110-2', '111-1','111-2', '112-1', '112-2','113-1','113-2'],
         withdrawalSeries: {
-          '休退學人數': [120, 105, 92, 78, 65, 58, 62]
+          '休學人數': [1959, 1862, 1733, 1708, 1652, 1542, 1684, 1715, 2026, 2168, 2163, 2101, 1883],
+          '退學人數': [932, 522, 996, 599, 954, 493, 763, 576, 876, 578, 994, 674, 1064, 646]
         },
         landYears: ['107', '108', '109', '110', '111', '112', '113', '114'],
         students: [21419, 21307, 21369, 21842, 21982, 21971, 21760, 21720],
@@ -1055,8 +1056,12 @@
           trigger: 'axis',
           axisPointer: { type: 'shadow' },
           formatter: (params) => {
-            return params[0].axisValue + ' 學年<br/>' +
-                   params[0].seriesName + '：<b>' + fmt(params[0].value) + '</b>';
+            // 顯示所有系列的數據
+            let result = params[0].axisValue + ' 學年<br/>';;
+            params.forEach(param => {
+              result += param.seriesName + '：<b>' + fmt(param.value) + '</b><br/>';
+            });
+            return result;
           }
         }),
         grid: { top: 30, left: 20, right: 20, bottom: 30 },
@@ -1071,29 +1076,48 @@
           axisLabel: { color: chartTheme.axis, fontSize: 12, fontWeight: 'bold' },
           axisLine: { lineStyle: { color: chartTheme.axisLine } }
         },
-        series: [{
-          name: '休退學人數',
-          type: 'bar',
-          data: d.withdrawalSeries['休退學人數'],
-          itemStyle: {
-            color: function(params) {
-              // 使用調色盤中的顏色，根據索引循環使用
-              return state.palette[params.dataIndex % state.palette.length];
+        series: [
+          {
+            name: '休學人數',
+            type: 'bar',
+            data: d.withdrawalSeries['休學人數'],
+            itemStyle: {
+              color: '#dc2626',
+            },
+            label: {
+              show: true,
+              position: 'top',
+              color: chartTheme.label,
+              formatter: (p) => fmt(p.value)
+            },
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 8,
+                shadowColor: 'rgba(15, 23, 42, 0.22)'
+              }
             }
           },
-          label: {
-            show: true,
-            position: 'top',
-            color: chartTheme.label,
-            formatter: (p) => fmt(p.value)
-          },
-          emphasis: {
+          {
+            name: '退學人數',
+            type: 'bar',
+            data: d.withdrawalSeries['退學人數'],
             itemStyle: {
-              shadowBlur: 8,
-              shadowColor: 'rgba(15, 23, 42, 0.22)'
+              color: '#2563eb',
+            },
+            label: {
+              show: true,
+              position: 'top',
+              color: chartTheme.label,
+              formatter: (p) => fmt(p.value)
+            },
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 8,
+                shadowColor: 'rgba(15, 23, 42, 0.22)'
+              }
             }
           }
-        }]
+        ]
       });
     }
 
@@ -1693,62 +1717,9 @@
     }
 
     function renderWithdrawal() {
-      const d = state.dataset.other;
-      const keys = Object.keys(d.withdrawalSeries);
-      const values = [];
-      keys.forEach((k, ki) => {
-        d.withdrawalYears.forEach((y, yi) => {
-          values.push([yi, ki, Number(d.withdrawalSeries[k][yi] || 0)]);
-        });
-      });
-      const maxValue = Math.max(...values.map((v) => v[2]));
-      withdrawalEC.setOption({
-        tooltip: baseTooltip({
-          position: 'top',
-          formatter: (p) => d.withdrawalYears[p.data[0]] + ' 學年<br/>' + keys[p.data[1]] + '：<b>' + fmt(p.data[2]) + '</b>'
-        }),
-        grid: { top: 30, left: 126, right: 24, bottom: 100 },
-        xAxis: {
-          type: 'category',
-          data: d.withdrawalYears,
-          axisLabel: { color: chartTheme.axis, fontSize: 12, fontWeight: 'bold' },
-          axisLine: { lineStyle: { color: chartTheme.axisLine } }
-        },
-        yAxis: {
-          type: 'category',
-          data: keys,
-          axisLabel: { color: chartTheme.axis, fontSize: 12, fontWeight: 'bold' },
-          axisLine: { lineStyle: { color: chartTheme.axisLine } }
-        },
-        visualMap: {
-          min: 0,
-          max: maxValue,
-          calculable: true,
-          orient: 'horizontal',
-          left: 'center',
-          bottom: 6,
-          textStyle: { color: chartTheme.muted },
-          inRange: { color: chartTheme.heatmap }
-        },
-        series: [{
-          name: '休退學人數熱力',
-          type: 'heatmap',
-          data: values,
-          label: {
-            show: true,
-            color: chartTheme.label,
-            textBorderColor: 'rgba(255, 255, 255, 0.88)',
-            textBorderWidth: 2,
-            formatter: (p) => fmt(p.data[2])
-          },
-          emphasis: {
-            itemStyle: {
-              shadowBlur: 8,
-              shadowColor: 'rgba(15, 23, 42, 0.22)'
-            }
-          }
-        }]
-      });
+      // This function is kept for compatibility but now delegates to setWithdrawalOption
+      const firstYear = state.dataset.other.withdrawalYears[0];
+      setWithdrawalOption(firstYear, false, true);
     }
 
     function fillYearSelectors() {
@@ -1800,7 +1771,8 @@
       renderRatio();
       renderSupport();
       renderLandArea();
-      renderWithdrawal();
+      const firstYear = state.dataset.other.withdrawalYears[0];
+      setWithdrawalOption(firstYear, false, true);
 
       document.getElementById('updatedAt').textContent = '更新時間：' + new Date().toLocaleString('zh-TW');
     }
@@ -1868,16 +1840,6 @@
       const year = document.getElementById('staffPieYearSel').value;
       renderStaffStructure(year);
     });
-    document.getElementById('withdrawalPlayBtn').addEventListener('click', toggleWithdrawal);
-    document.getElementById('withdrawalResetBtn').addEventListener('click', resetWithdrawal);
-    document.getElementById('withdrawalYearSel').addEventListener('change', () => {
-      const year = document.getElementById('withdrawalYearSel').value;
-      const years = state.dataset.other.withdrawalYears;
-      const idx = Math.max(0, years.indexOf(year));
-      state.withdrawalIndex = (idx + 1) % years.length;
-      setWithdrawalOption(year, false, true);
-    });
-
     document.getElementById('withdrawalPlayBtn').addEventListener('click', toggleWithdrawal);
     document.getElementById('withdrawalResetBtn').addEventListener('click', resetWithdrawal);
     document.getElementById('withdrawalYearSel').addEventListener('change', () => {
