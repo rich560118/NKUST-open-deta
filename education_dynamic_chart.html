@@ -1070,14 +1070,14 @@
           data: [year],
           axisLabel: { color: chartTheme.axis, fontSize: 12, fontWeight: 'bold' },
           axisLine: { lineStyle: { color: chartTheme.axisLine } },
-          animationDurationUpdate: 300,
+          animationDurationUpdate: animate ? 350 : 0,
           animationEasing: 'cubicOut'
         },
         yAxis: {
           type: 'value',
           axisLabel: { color: chartTheme.axis, fontSize: 12, fontWeight: 'bold' },
           axisLine: { lineStyle: { color: chartTheme.axisLine } },
-          animationDurationUpdate: 300,
+          animationDurationUpdate: animate ? 350 : 0,
           animationEasing: 'cubicOut'
         },
         series: [
@@ -1101,7 +1101,8 @@
               }
             },
             animation: true,
-            animationDurationUpdate: 900,
+            animationDuration: animate ? 350 : 0,
+            animationDurationUpdate: animate ? 900 : 0,
             animationEasing: 'cubicOut'
           },
           {
@@ -1124,7 +1125,8 @@
               }
             },
             animation: true,
-            animationDurationUpdate: 900,
+            animationDuration: animate ? 350 : 0,
+            animationDurationUpdate: animate ? 900 : 0,
             animationEasing: 'cubicOut'
           }
         ]
