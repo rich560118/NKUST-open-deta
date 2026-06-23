@@ -1057,7 +1057,7 @@
           axisPointer: { type: 'shadow' },
           formatter: (params) => {
             // 顯示所有系列的數據
-            let result = params[0].axisValue + ' 學年<br/>';;
+            let result = params[0].axisValue + ' 學年<br/>';
             params.forEach(param => {
               result += param.seriesName + '：<b>' + fmt(param.value) + '</b><br/>';
             });
@@ -1067,7 +1067,7 @@
         grid: { top: 30, left: 20, right: 20, bottom: 30 },
         xAxis: {
           type: 'category',
-          data: [year],
+          data: d.withdrawalYears,
           axisLabel: { color: chartTheme.axis, fontSize: 12, fontWeight: 'bold' },
           axisLine: { lineStyle: { color: chartTheme.axisLine } },
           animationDurationUpdate: animate ? 350 : 0,
@@ -1084,7 +1084,7 @@
           {
             name: '休學人數',
             type: 'line',
-            data: [d.withdrawalSeries['休學人數'][d.withdrawalYears.indexOf(year)]],
+            data: d.withdrawalSeries['休學人數'],
             itemStyle: {
               color: '#dc2626',
             },
@@ -1108,7 +1108,7 @@
           {
             name: '退學人數',
             type: 'line',
-            data: [d.withdrawalSeries['退學人數'][d.withdrawalYears.indexOf(year)]],
+            data: d.withdrawalSeries['退學人數'],
             itemStyle: {
               color: '#2563eb',
             },
