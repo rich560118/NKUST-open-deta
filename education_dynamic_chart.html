@@ -1094,11 +1094,18 @@
               emphasis: index === d.withdrawalYears.indexOf(year) ? {
                 scale: 4,
                 itemStyle: {
-                  shadowBlur: 12,
-                  shadowColor: 'rgba(220, 38, 38, 0.3)'
+                  shadowBlur: 40,
+                  shadowColor: 'rgba(220, 38, 38, 1)'
+                },
+                lineStyle: {
+                  width: 6,
+                  shadowBlur: 25,
+                  shadowColor: 'rgba(220, 38, 38, 0.6)'
                 }
               } : {}
             })),
+            symbol: 'circle',
+            symbolSize: 6,
             itemStyle: {
               color: '#dc2626',
             },
@@ -1111,18 +1118,15 @@
                 return seriesName + '：' + fmt(p.value);
               }
             },
+            // Keep series-level emphasis enabled but customize it
             emphasis: {
-              scale: 3,
-              itemStyle: {
-                shadowBlur: 8,
-                shadowColor: 'rgba(15, 23, 42, 0.22)'
-              }
+              focus: 'self'
             },
             animation: true,
             animationDuration: animate ? 350 : 0,
             animationDurationUpdate: animate ? 900 : 0,
             animationEasing: 'cubicOut'
-          },
+          }
           {
             name: '退學人數',
             type: 'line',
@@ -1131,11 +1135,18 @@
               emphasis: index === d.withdrawalYears.indexOf(year) ? {
                 scale: 4,
                 itemStyle: {
-                  shadowBlur: 12,
-                  shadowColor: 'rgba(37, 99, 235, 0.3)'
+                  shadowBlur: 40,
+                  shadowColor: 'rgba(37, 99, 235, 1)'
+                },
+                lineStyle: {
+                  width: 6,
+                  shadowBlur: 25,
+                  shadowColor: 'rgba(37, 99, 235, 0.6)'
                 }
               } : {}
             })),
+            symbol: 'circle',
+            symbolSize: 6,
             itemStyle: {
               color: '#2563eb',
             },
@@ -1148,12 +1159,9 @@
                 return seriesName + '：' + fmt(p.value);
               }
             },
+            // Keep series-level emphasis enabled but customize it
             emphasis: {
-              scale: 3,
-              itemStyle: {
-                shadowBlur: 8,
-                shadowColor: 'rgba(15, 23, 42, 0.22)'
-              }
+              focus: 'self'
             },
             animation: true,
             animationDuration: animate ? 350 : 0,
