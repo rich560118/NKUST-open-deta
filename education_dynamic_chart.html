@@ -1114,8 +1114,7 @@
               position: 'top',
               color: chartTheme.label,
               formatter: (p) => {
-                const seriesName = p.seriesName.replace('人數', '');
-                return seriesName + '：' + fmt(p.value);
+                return fmt(p.value);
               }
             },
             // Keep series-level emphasis enabled but customize it
@@ -1155,8 +1154,7 @@
               position: 'top',
               color: chartTheme.label,
               formatter: (p) => {
-                const seriesName = p.seriesName.replace('人數', '');
-                return seriesName + '：' + fmt(p.value);
+                return fmt(p.value);
               }
             },
             // Keep series-level emphasis enabled but customize it
