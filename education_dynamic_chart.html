@@ -1089,7 +1089,16 @@
           {
             name: '休學人數',
             type: 'line',
-            data: d.withdrawalSeries['休學人數'],
+            data: d.withdrawalSeries['休學人數'].map((value, index) => ({
+              value: value,
+              emphasis: index === d.withdrawalYears.indexOf(year) ? {
+                scale: 4,
+                itemStyle: {
+                  shadowBlur: 12,
+                  shadowColor: 'rgba(220, 38, 38, 0.3)'
+                }
+              } : {}
+            })),
             itemStyle: {
               color: '#dc2626',
             },
@@ -1097,7 +1106,10 @@
               show: true,
               position: 'top',
               color: chartTheme.label,
-              formatter: (p) => fmt(p.value)
+              formatter: (p) => {
+                const seriesName = p.seriesName.replace('人數', '');
+                return seriesName + '：' + fmt(p.value);
+              }
             },
             emphasis: {
               scale: 3,
@@ -1114,7 +1126,16 @@
           {
             name: '退學人數',
             type: 'line',
-            data: d.withdrawalSeries['退學人數'],
+            data: d.withdrawalSeries['退學人數'].map((value, index) => ({
+              value: value,
+              emphasis: index === d.withdrawalYears.indexOf(year) ? {
+                scale: 4,
+                itemStyle: {
+                  shadowBlur: 12,
+                  shadowColor: 'rgba(37, 99, 235, 0.3)'
+                }
+              } : {}
+            })),
             itemStyle: {
               color: '#2563eb',
             },
@@ -1122,7 +1143,10 @@
               show: true,
               position: 'top',
               color: chartTheme.label,
-              formatter: (p) => fmt(p.value)
+              formatter: (p) => {
+                const seriesName = p.seriesName.replace('人數', '');
+                return seriesName + '：' + fmt(p.value);
+              }
             },
             emphasis: {
               scale: 3,
