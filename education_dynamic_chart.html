@@ -418,7 +418,7 @@
 
           <!-- 休退學人數統計 -->
           <section class="panel span-6">
-            <h2 class="section-title">休退學人數統計</h2>
+            <h2 class="section-title">休退學人數統計（單位：人）</h2>
             <div class="controls">
               <button class="btn" id="withdrawalPlayBtn">播放</button>
               <button class="btn danger" id="withdrawalResetBtn">重設</button>
@@ -1067,7 +1067,12 @@
         legend: {
           top: 10,
           left: 'center',
-          textStyle: { color: chartTheme.muted, fontSize: 12 }
+          textStyle: { color: chartTheme.muted, fontSize: 12 },
+          title: {
+            text: '單位：人',
+            left: 'center',
+            textStyle: { color: chartTheme.text, fontSize: 12 }
+          }
         },
         grid: { top: 30, left: 20, right: 20, bottom: 30 },
         xAxis: {
@@ -1114,7 +1119,8 @@
               position: 'top',
               color: chartTheme.label,
               formatter: (p) => {
-                return fmt(p.value);
+                const seriesName = p.seriesName.replace('人數', '');
+                return seriesName + '：' + fmt(p.value);
               }
             },
             // Keep series-level emphasis enabled but customize it
@@ -1154,7 +1160,8 @@
               position: 'top',
               color: chartTheme.label,
               formatter: (p) => {
-                return fmt(p.value);
+                const seriesName = p.seriesName.replace('人數', '');
+                return seriesName + '：' + fmt(p.value);
               }
             },
             // Keep series-level emphasis enabled but customize it
