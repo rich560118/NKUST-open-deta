@@ -648,10 +648,10 @@
     };
 
     const chartTheme = {
-      axis: '#0A1628',
-      axisStrong: '#0A1628',
-      axisLine: 'rgba(10, 22, 40, 0.28)',
-      gridLine: 'rgba(10, 22, 40, 0.24)',
+      axis: '#f8fafc',
+      axisStrong: '#f8fafc',
+      axisLine: 'rgba(248, 250, 252, 0.28)',
+      gridLine: 'rgba(248, 250, 252, 0.24)',
       label: '#0A1628',
       muted: '#0A1628',
       panelBorder: '#0A1628',
@@ -665,7 +665,7 @@
       warning: '#f59e0b',
       warningSoft: 'rgba(245, 158, 11, 0.16)',
       watermark: 'rgba(15, 118, 110, 0.12)',
-      heatmap: ['#0f172a', '#1e293b', '#334155', '#475569', '#0f766e']
+      heatmap: ['#0f766e', '#0f766e', '#0f766e', '#0f766e', '#0f766e']
     };
 
     const raceEC = echarts.init(document.getElementById('raceChart'));
@@ -1067,7 +1067,7 @@
         legend: {
           top: 10,
           left: 'center',
-          textStyle: { color: chartTheme.text, fontSize: 12 }
+          textStyle: { color: chartTheme.muted, fontSize: 12 }
         },
         grid: { top: 30, left: 20, right: 20, bottom: 30 },
         xAxis: {
