@@ -1067,6 +1067,7 @@
         legend: {
           top: 10,
           left: 'center',
+          data: ['休學人數', '退學人數'],
           textStyle: { color: chartTheme.text, fontSize: 12 }
         },
         grid: { top: 30, left: 20, right: 20, bottom: 30 },
@@ -1114,8 +1115,7 @@
               position: 'top',
               color: chartTheme.label,
               formatter: (p) => {
-                const seriesName = p.seriesName.replace('人數', '');
-                return seriesName + '：' + fmt(p.value);
+                return fmt(p.value);
               }
             },
             // Keep series-level emphasis enabled but customize it
@@ -1155,8 +1155,7 @@
               position: 'top',
               color: chartTheme.label,
               formatter: (p) => {
-                const seriesName = p.seriesName.replace('人數', '');
-                return seriesName + '：' + fmt(p.value);
+                return fmt(p.value);
               }
             },
             // Keep series-level emphasis enabled but customize it

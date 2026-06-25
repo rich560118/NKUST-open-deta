@@ -11,3 +11,10 @@ Desktop.ini
 # 編輯器暫存檔案
 *.swp
 *~
+
+# 本機匯出或暫存檔案
+Pages.html
+Pages_files/
+temp.html
+test.txt
+deta.py
